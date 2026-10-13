@@ -39,6 +39,12 @@ export function useApiUser() {
       },
     )
   }
+  // Projets d'un utilisateur choisi à l'écran (appelable après un await / un watch)
+  async function fetchProjectsOfUser(id: number) {
+    return await $fetch<ProjectListDto[]>(`${apiBase}/user/${id}/projects`, {
+      headers: { Authorization: `Bearer ${accessToken.value}` },
+    })
+  }
   async function getContributionByUserId(id: number) {
     return await useFetch<ContributionListDto[]>(
       () => `${apiBase}/user/${id}/contributions`,
@@ -80,6 +86,7 @@ export function useApiUser() {
     getUserById,
     getUserProfil,
     getProjetByUserId,
+    fetchProjectsOfUser,
     getContributionByUserId,
     saveUser,
     updateUser,

@@ -28,7 +28,13 @@
           </div>
           <p style="margin: 1rem 0 0">
             Rôle :
-            <span v-for="r in me?.roles" :key="r" class="ap-pill">{{ r }}</span>
+            <span
+              v-for="r in me?.roles"
+              :key="r"
+              class="ap-pill"
+              :data-tone="roleTone(r)"
+              >{{ r }}</span
+            >
             <span v-if="!me?.roles?.length" class="ap-muted">inconnu</span>
           </p>
         </article>
@@ -56,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-  import { initials, fullName } from '~/utils/format'
+  import { initials, fullName, roleTone } from '~/utils/format'
 
   const token = getAccessToken()
   const refreshToken = getRefreshToken()

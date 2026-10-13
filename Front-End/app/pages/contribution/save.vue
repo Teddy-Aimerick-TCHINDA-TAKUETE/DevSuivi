@@ -18,12 +18,26 @@
           </label>
           <label>
             Projet
-            <select v-model.number="form.idProject" required>
-              <option :value="0" disabled>Choisir un projet…</option>
+            <select
+              v-model.number="form.idProject"
+              :disabled="!form.idUser || loadingProjects"
+              :aria-busy="loadingProjects"
+              required
+            >
+              <option :value="0" disabled>
+                {{
+                  form.idUser
+                    ? 'Choisir un projet…'
+                    : 'Sélectionnez d’abord un utilisateur'
+                }}
+              </option>
               <option v-for="p in projects" :key="p.id" :value="p.id">
                 {{ p.name }}
               </option>
             </select>
+            <small v-if="form.idUser && !loadingProjects && !projects.length"
+              >Cet utilisateur n’est affecté à aucun projet.</small
+            >
           </label>
           <div class="ap-form-grid">
             <label>
@@ -48,9 +62,9 @@
             type="submit"
             class="ap-btn"
             :aria-busy="submitting"
-            :disabled="submitting"
+            :disabled="submitting || !canSubmit"
           >
-            {{ id ? 'Enregistrer' : 'Ajouter la contribution' }}
+            {{ id ? 'Enregistrer les modifications' : 'Créer la contribution' }}
           </button>
         </form>
       </article>
@@ -59,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+  import type { ProjectListDto } from '~/types/projectTypes'
   import { fullName, errorMessage } from '~/utils/format'
 
   definePageMeta({ key: (route) => route.fullPath })
@@ -69,8 +84,8 @@
   const id = Number(route.query.id) || null
   const { getContributionById, saveContribution, updateContribution } =
     useApiContribution()
-  const { data: users } = await useApiUser().getAllUsers()
-  const { data: projects } = await useApiProject().getAllProjects()
+  const { getAllUsers, fetchProjectsOfUser } = useApiUser()
+  const { data: users } = await getAllUsers()
   const existing = id ? await getContributionById(id) : null
 
   const form = reactive({
@@ -80,21 +95,63 @@
     idProject: Number(route.query.project) || 0,
   })
 
+  // Projets de l'utilisateur sélectionné (vide tant qu'aucun utilisateur n'est choisi)
+  const projects = ref<ProjectListDto[]>([])
+  const loadingProjects = ref(false)
+
+  // Nom du projet de la contribution en cours de modification (le détail
+  // ne renvoie pas l'id du projet : on le retrouve grâce à son nom)
+  let wantedProjectName: string | null = null
+
   if (existing) {
     watch(
-      [existing.data, projects],
-      ([c, list]) => {
+      existing.data,
+      (c) => {
         if (!c) return
         form.duration = c.duration
         form.date = String(c.dateContribution).slice(0, 10)
+        wantedProjectName = c.project?.name ?? null
         form.idUser = c.user?.id ?? 0
-        // Le détail ne renvoie pas l'id du projet : on le retrouve grâce à son nom
-        form.idProject =
-          list?.find((p) => p.name === c.project?.name)?.id ?? form.idProject
       },
       { immediate: true },
     )
   }
+
+  watch(
+    () => form.idUser,
+    async (userId) => {
+      projects.value = []
+      if (!userId) {
+        form.idProject = 0
+        return
+      }
+      loadingProjects.value = true
+      try {
+        projects.value = await fetchProjectsOfUser(userId)
+      } catch {
+        projects.value = []
+      }
+      loadingProjects.value = false
+      // On ne garde un projet que s'il fait partie de ceux de l'utilisateur
+      const byName = wantedProjectName
+        ? projects.value.find((p) => p.name === wantedProjectName)?.id
+        : undefined
+      wantedProjectName = null
+      const keep = byName ?? form.idProject
+      form.idProject = projects.value.some((p) => p.id === keep) ? keep : 0
+    },
+    { immediate: true },
+  )
+
+  // Tous les champs obligatoires doivent être remplis
+  const canSubmit = computed(
+    () =>
+      form.idUser > 0 &&
+      form.idProject > 0 &&
+      form.date !== '' &&
+      String(form.duration) !== '' &&
+      Number(form.duration) >= 0,
+  )
 
   const submitting = ref(false)
   const message = ref('')

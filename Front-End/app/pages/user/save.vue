@@ -34,14 +34,17 @@
               modification.</small
             >
           </label>
-          <label>
-            Rôles
-            <input
-              v-model="form.roles"
-              placeholder="DEVELOPER, MANAGER, ADMIN"
-            />
-            <small>Séparez les rôles par des virgules.</small>
-          </label>
+          <fieldset>
+            <legend>Rôles</legend>
+            <label v-for="r in ALL_ROLES" :key="r">
+              <input v-model="form.roles" type="checkbox" :value="r" />
+              {{ r }}
+            </label>
+            <small
+              >Facultatif : sans rôle coché, l’utilisateur est
+              <strong>DEVELOPER</strong>.</small
+            >
+          </fieldset>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
             {{ message }}
           </p>
@@ -49,9 +52,9 @@
             type="submit"
             class="ap-btn"
             :aria-busy="submitting"
-            :disabled="submitting"
+            :disabled="submitting || !canSubmit"
           >
-            {{ id ? 'Enregistrer' : 'Créer l’utilisateur' }}
+            {{ id ? 'Enregistrer les modifications' : 'Créer l’utilisateur' }}
           </button>
         </form>
       </article>
@@ -60,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-  import { errorMessage, parseRoles } from '~/utils/format'
+  import { ALL_ROLES, errorMessage } from '~/utils/format'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -74,7 +77,7 @@
     lastName: '',
     email: '',
     password: '',
-    roles: 'DEVELOPER',
+    roles: [] as string[],
   })
   if (existing) {
     watch(
@@ -85,12 +88,21 @@
           firstName: u.firstName,
           lastName: u.lastName,
           email: u.email,
-          roles: u.roles?.join(', ') ?? '',
+          roles: [...(u.roles ?? [])],
         })
       },
       { immediate: true },
     )
   }
+
+  // Tous les champs obligatoires doivent être remplis (les rôles sont facultatifs)
+  const canSubmit = computed(
+    () =>
+      form.firstName.trim() !== '' &&
+      form.lastName.trim() !== '' &&
+      /^\S+@\S+\.\S+$/.test(form.email.trim()) &&
+      form.password !== '',
+  )
 
   const submitting = ref(false)
   const message = ref('')
@@ -98,7 +110,11 @@
   async function submit() {
     submitting.value = true
     message.value = ''
-    const dto = { ...form, roles: parseRoles(form.roles) }
+    // Aucun rôle coché → DEVELOPER par défaut
+    const dto = {
+      ...form,
+      roles: form.roles.length ? [...form.roles] : ['DEVELOPER'],
+    }
     const res = id ? await updateUser(id, dto) : await saveUser(dto)
     submitting.value = false
     if (res.error.value) {

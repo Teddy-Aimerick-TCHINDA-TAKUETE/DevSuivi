@@ -179,13 +179,37 @@
     background: var(--ap-soft);
     color: var(--pico-primary);
   }
-  .ap-pill[data-tone='ok'] {
+  .ap-pill[data-tone='planned'] {
+    background: rgba(59, 130, 246, 0.15);
+    color: #1d4ed8;
+  }
+  .ap-pill[data-tone='progress'] {
+    background: rgba(139, 92, 246, 0.15);
+    color: #6d28d9;
+  }
+  .ap-pill[data-tone='finish'] {
     background: rgba(16, 185, 129, 0.15);
     color: #059669;
   }
-  .ap-pill[data-tone='warn'] {
+  .ap-pill[data-tone='canceled'] {
+    background: rgba(239, 68, 68, 0.15);
+    color: #b91c1c;
+  }
+  .ap-pill[data-tone='pause'] {
     background: rgba(245, 158, 11, 0.18);
     color: #b45309;
+  }
+  .ap-pill[data-tone='role-admin'] {
+    background: rgba(236, 72, 153, 0.15);
+    color: #be185d;
+  }
+  .ap-pill[data-tone='role-manager'] {
+    background: rgba(20, 184, 166, 0.16);
+    color: #0f766e;
+  }
+  .ap-pill[data-tone='role-developer'] {
+    background: rgba(99, 102, 241, 0.15);
+    color: #4338ca;
   }
   .ap-pill + .ap-pill {
     margin-left: 0.25rem;

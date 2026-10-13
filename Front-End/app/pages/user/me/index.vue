@@ -15,9 +15,13 @@
                 <h3>{{ fullName(user) }}</h3>
                 <small>{{ user.email }}</small>
                 <p style="margin: 0.4rem 0 0">
-                  <span v-for="r in user.roles" :key="r" class="ap-pill">{{
-                    r
-                  }}</span>
+                  <span
+                    v-for="r in user.roles"
+                    :key="r"
+                    class="ap-pill"
+                    :data-tone="roleTone(r)"
+                    >{{ r }}</span
+                  >
                 </p>
               </div>
             </div>
@@ -63,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-  import { fullName, initials, errorMessage } from '~/utils/format'
+  import { fullName, initials, errorMessage, roleTone } from '~/utils/format'
 
   const { getUserProfil, getProjetByUserId, getContributionByUserId } =
     useApiUser()

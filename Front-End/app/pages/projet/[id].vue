@@ -42,6 +42,14 @@
           </div>
 
           <label>
+            Changer l’état du projet
+            <ProjectStatusSelect
+              :project="project"
+              @changed="project.status = $event"
+            />
+          </label>
+
+          <label>
             Durée cumulée / quota
             <progress :value="usedTime" :max="project.quota || 1" />
           </label>

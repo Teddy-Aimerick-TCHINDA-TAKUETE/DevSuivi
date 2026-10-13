@@ -18,12 +18,27 @@
           </label>
           <label>
             Projet
-            <select v-model.number="form.project" required>
-              <option :value="0" disabled>Choisir un projet…</option>
-              <option v-for="p in projects" :key="p.id" :value="p.id">
+            <select
+              v-model.number="form.project"
+              :disabled="!form.user || loadingProjects"
+              :aria-busy="loadingProjects"
+              required
+            >
+              <option :value="0" disabled>
+                {{
+                  form.user
+                    ? 'Choisir un projet…'
+                    : 'Sélectionnez d’abord un utilisateur'
+                }}
+              </option>
+              <option v-for="p in availableProjects" :key="p.id" :value="p.id">
                 {{ p.name }}
               </option>
             </select>
+            <small
+              v-if="form.user && !loadingProjects && !availableProjects.length"
+              >Cet utilisateur est déjà affecté à tous les projets.</small
+            >
           </label>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
             {{ message }}
@@ -34,7 +49,7 @@
             :aria-busy="submitting"
             :disabled="submitting || !form.user || !form.project"
           >
-            Affecter
+            Créer l’affectation
           </button>
         </form>
       </article>
@@ -43,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+  import type { ProjectListDto } from '~/types/projectTypes'
   import { fullName, errorMessage } from '~/utils/format'
 
   definePageMeta({ key: (route) => route.fullPath })
@@ -50,13 +66,44 @@
   // Préremplissable via /assign/save?user=1&project=2
   const route = useRoute()
   const { saveAssign } = useApiAssign()
-  const { data: users } = await useApiUser().getAllUsers()
+  const { getAllUsers, fetchProjectsOfUser } = useApiUser()
+  const { data: users } = await getAllUsers()
   const { data: projects } = await useApiProject().getAllProjects()
 
   const form = reactive({
     user: Number(route.query.user) || 0,
     project: Number(route.query.project) || 0,
   })
+  // Projets où l'utilisateur choisi n'est pas encore affecté
+  const availableProjects = ref<ProjectListDto[]>([])
+  const loadingProjects = ref(false)
+
+  watch(
+    () => form.user,
+    async (userId) => {
+      availableProjects.value = []
+      if (!userId) {
+        form.project = 0
+        return
+      }
+      loadingProjects.value = true
+      try {
+        const assigned = await fetchProjectsOfUser(userId)
+        const ids = new Set(assigned.map((p) => p.id))
+        availableProjects.value = (projects.value ?? []).filter(
+          (p) => !ids.has(p.id),
+        )
+      } catch {
+        availableProjects.value = []
+      }
+      loadingProjects.value = false
+      // ?project= n'est conservé que si l'utilisateur n'y est pas déjà affecté
+      if (!availableProjects.value.some((p) => p.id === form.project))
+        form.project = 0
+    },
+    { immediate: true },
+  )
+
   const submitting = ref(false)
   const message = ref('')
 

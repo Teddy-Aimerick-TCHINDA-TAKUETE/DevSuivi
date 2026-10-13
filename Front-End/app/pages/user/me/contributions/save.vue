@@ -48,9 +48,9 @@
             type="submit"
             class="ap-btn"
             :aria-busy="submitting"
-            :disabled="submitting"
+            :disabled="submitting || !canSubmit"
           >
-            {{ id ? 'Enregistrer' : 'Ajouter la contribution' }}
+            {{ id ? 'Enregistrer les modifications' : 'Créer la contribution' }}
           </button>
         </form>
       </article>
@@ -101,6 +101,16 @@
       { immediate: true },
     )
   }
+
+  // Tous les champs obligatoires doivent être remplis
+  const canSubmit = computed(
+    () =>
+      form.idUser > 0 &&
+      form.idProject > 0 &&
+      form.date !== '' &&
+      String(form.duration) !== '' &&
+      Number(form.duration) >= 0,
+  )
 
   const submitting = ref(false)
   const message = ref('')

@@ -17,12 +17,50 @@ export const fullName = (u?: { firstName: string; lastName: string } | null) =>
 export const initials = (u?: { firstName: string; lastName: string } | null) =>
   u ? `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase() : '?'
 
+// États possibles d'un projet (mêmes valeurs que côté Back-End)
+export const PROJECT_STATUSES = [
+  'PLANNED',
+  'IN_PROGRESS',
+  'FINISH',
+  'CANCELED',
+  'PAUSE',
+] as const
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
+export const DEFAULT_PROJECT_STATUS: ProjectStatus = 'PLANNED'
+
+// Une couleur par état : voir les .ap-pill[data-tone=...] dans AppPage.vue
 export const statusTone = (status = '') => {
-  const s = status.toLowerCase()
-  if (/(term|done|fini|clos|archiv)/.test(s)) return 'ok'
-  if (/(attente|pause|todo|brouillon|pending)/.test(s)) return 'warn'
-  return 'info'
+  switch (status.toUpperCase()) {
+    case 'PLANNED':
+      return 'planned'
+    case 'IN_PROGRESS':
+      return 'progress'
+    case 'FINISH':
+      return 'finish'
+    case 'CANCELED':
+      return 'canceled'
+    case 'PAUSE':
+      return 'pause'
+    default:
+      return 'info'
+  }
 }
+
+// Une couleur par rôle : voir .ap-pill[data-tone='role-...'] dans AppPage.vue
+export const roleTone = (role = '') => {
+  switch (role.toUpperCase()) {
+    case 'ADMIN':
+      return 'role-admin'
+    case 'MANAGER':
+      return 'role-manager'
+    case 'DEVELOPER':
+      return 'role-developer'
+    default:
+      return 'info'
+  }
+}
+
+export const ALL_ROLES = ['ADMIN', 'MANAGER', 'DEVELOPER'] as const
 
 export const parseRoles = (value: string) =>
   value

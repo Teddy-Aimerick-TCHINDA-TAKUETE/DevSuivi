@@ -44,9 +44,13 @@
                 </td>
                 <td class="ap-muted">{{ u.email }}</td>
                 <td>
-                  <span v-for="r in u.roles" :key="r" class="ap-pill">{{
-                    r
-                  }}</span>
+                  <span
+                    v-for="r in u.roles"
+                    :key="r"
+                    class="ap-pill"
+                    :data-tone="roleTone(r)"
+                    >{{ r }}</span
+                  >
                 </td>
                 <td class="ap-cell-actions">
                   <NuxtLink
@@ -72,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-  import { fullName, initials, errorMessage } from '~/utils/format'
+  import { fullName, initials, errorMessage, roleTone } from '~/utils/format'
 
   const { getAllUsers, deleteUser } = useApiUser()
   const { data: users, status, error, refresh } = await getAllUsers()

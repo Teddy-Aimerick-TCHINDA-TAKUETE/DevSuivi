@@ -35,11 +35,11 @@
             </label>
             <label>
               Statut
-              <input
-                v-model="form.status"
-                placeholder="ex : EN_COURS"
-                required
-              />
+              <select v-model="form.status" required>
+                <option v-for="s in PROJECT_STATUSES" :key="s" :value="s">
+                  {{ s }}
+                </option>
+              </select>
             </label>
             <label>
               Serveur
@@ -58,7 +58,7 @@
             type="submit"
             class="ap-btn"
             :aria-busy="submitting"
-            :disabled="submitting"
+            :disabled="submitting || !canSubmit"
           >
             {{ id ? 'Enregistrer les modifications' : 'Créer le projet' }}
           </button>
@@ -70,7 +70,11 @@
 
 <script setup lang="ts">
   import type { ProjectNewDto } from '~/types/projectTypes'
-  import { errorMessage } from '~/utils/format'
+  import {
+    DEFAULT_PROJECT_STATUS,
+    PROJECT_STATUSES,
+    errorMessage,
+  } from '~/utils/format'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -84,7 +88,7 @@
     name: '',
     description: '',
     quota: 0,
-    status: '',
+    status: DEFAULT_PROJECT_STATUS as string,
     idServer: 0,
   })
   if (existing) {
@@ -103,6 +107,16 @@
       { immediate: true },
     )
   }
+
+  // Tous les champs obligatoires doivent être remplis
+  const canSubmit = computed(
+    () =>
+      form.name.trim() !== '' &&
+      String(form.quota) !== '' &&
+      Number(form.quota) >= 0 &&
+      form.status !== '' &&
+      form.idServer > 0,
+  )
 
   const submitting = ref(false)
   const message = ref('')
