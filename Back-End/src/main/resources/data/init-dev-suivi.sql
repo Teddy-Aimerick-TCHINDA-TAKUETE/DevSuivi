@@ -48,9 +48,9 @@ ALTER TABLE Server      ALTER COLUMN id_server     RESTART WITH 8;
 INSERT INTO Project (id_project, name, description, quota, status, id_server) VALUES
 (1, 'API Portal RH', 'Refonte de l’API REST pour la gestion des collaborateurs et des congés', 120, 'IN_PROGRESS', 1),
 (2, 'Dashboard Analytics', 'Tableau de bord de suivi en temps réel des ventes et métriques clés', 80, 'IN_PROGRESS', 2),
-(3, 'Migration Cloud AWS', 'Migration de l’ancienne infrastructure locale vers AWS ECS / Fargate', 200, 'COMPLETED', 1),
+(3, 'Migration Cloud AWS', 'Migration de l’ancienne infrastructure locale vers AWS ECS / Fargate', 200, 'FINISH', 1),
 (4, 'Application Mobile Client', 'Développement de l’application mobile React Native (Android/iOS)', 150, 'IN_PROGRESS', 2),
-(5, 'Refonte Design System', 'Création de la bibliothèque de composants UI réutilisables (Vue.js / Nuxt)', 60, 'COMPLETED', 3),
+(5, 'Refonte Design System', 'Création de la bibliothèque de composants UI réutilisables (Vue.js / Nuxt)', 60, 'FINISH', 3),
 (6, 'Pipeline Data ETL', 'Mise en place de pipelines Airflow pour l analyse BI', 100, 'IN_PROGRESS', 4),
 (7, 'Microservices Payment', 'Service d intégration Stripe et gestion des factures', 90, 'IN_PROGRESS', 5),
 (8, 'Sécurité & Audit IAM', 'Mise en conformité RGPD et SSO OpenID Connect', 75, 'PLANNED', 1),
