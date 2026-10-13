@@ -17,7 +17,7 @@ API REST de l'application de suivi d'activités de développeurs.
 
 ## Configuration
 
-Fichier [src/main/resources/application.properties](src/main/resources/application.properties) :
+Fichier [application.properties](src/main/resources/application.properties) :
 
 | Propriété | Valeur par défaut |
 |---|---|
@@ -61,20 +61,21 @@ Les autres comptes suivent le format `prenom.nom@company.com` / `prenom_nom`.
 ./gradlew build        # compile et produit le jar dans build/libs
 ```
 
-Documentation interactive : http://localhost:8080/swagger-ui.html. Pour tester les routes protégées, appeler `/auth/login` puis coller l'access token dans « Authorize ».
+Documentation interactive : `http://localhost:8080/swagger-ui.html`. Pour tester les routes protégées, appeler `/auth/login` puis coller l'access token dans « Authorize ».
 
 ## Architecture
 
-```
+```text
 src/main/java/devSuivi/
 ├── controller/   Endpoints REST (Assign, Contribution, Project, Server, User)
 ├── service/      Logique métier, transactions
 ├── repository/   Interfaces Spring Data JPA
 ├── entity/       Entités JPA (User, Project, Server, Contribution, Assign + AssignId)
 ├── dto/          Records d'entrée/sortie (*NewDto, *ListDto, *DetailDto)
-├── mapper/       Mappers MapStruct entité ↔ DTO (implémentations générées dans src/main/generated)
+├── mapper/       Mappers MapStruct entité ↔ DTO (générés dans src/main/generated)
 ├── security/     JWT, SecurityConfig, AuthController/AuthService, config OpenAPI
-└── exception/    GestionnaireExceptions : erreurs renvoyées au format ProblemDetail (404, 400 avec champs en erreur)
+└── exception/    GestionnaireExceptions : erreurs au format ProblemDetail
+                  (404, 400 avec champs en erreur)
 ```
 
 ## Authentification
@@ -92,7 +93,8 @@ src/main/java/devSuivi/
 | GET | `/user/me` | authentifié |
 | GET | `/user/{id}/projects`, `/user/{id}/contributions` | authentifié |
 | GET | `/user` | ADMIN, MANAGER |
-| GET/POST/PUT/DELETE | `/user`, `/user/{id}` | ADMIN |
+| POST | `/user` | ADMIN |
+| GET/PUT/DELETE | `/user/{id}` | ADMIN |
 | GET | `/project`, `/project/{id}`, `/project/{id}/users`, `/project/{id}/contributions` | authentifié |
 | POST/PUT/DELETE | `/project`, `/project/{id}` | ADMIN, MANAGER |
 | GET/POST/PUT/DELETE | `/server`, `/server/{id}`, `/server/{id}/projects` | ADMIN, MANAGER |
@@ -109,6 +111,7 @@ src/main/java/devSuivi/
 ## Limites actuelles
 
 Ces règles du sujet ne sont pas encore appliquées côté API :
+
 - refuser une contribution sur un projet clôturé ou sur un projet auquel le développeur n'est pas affecté ;
 - vérifier qu'un développeur ne modifie que ses propres contributions ;
 - calculer le temps consommé et l'indicateur de dépassement de quota ;

@@ -3,6 +3,7 @@
 Projet d'Intégration Opérationnelle (3iL I3, septembre 2026).
 
 Application web interne permettant :
+
 - aux **développeurs** de déclarer leurs contributions (temps passé, en minutes, sur un projet) ;
 - aux **responsables** de gérer les projets, les serveurs, les comptes et les affectations, et de suivre la charge de l'équipe.
 
@@ -13,30 +14,38 @@ Application web interne permettant :
 | [Back-End/](Back-End/) | API REST sécurisée par JWT | Java 25, Gradle, Spring Boot 4, JPA, PostgreSQL |
 | [Front-End/](Front-End/) | Interface web | TypeScript, Node, Vue 3, Nuxt 4 |
 
-Chaque dossier a son propre README avec les instructions détaillées.
+Chaque dossier a son propre README avec les instructions détaillées : [Back-End](Back-End/README.md) et [Front-End](Front-End/README.md).
 
 ## Démarrage rapide
 
 1. **Base de données** : créer une base PostgreSQL `dev_suivi` (utilisateur `postgres` / `postgres`), puis exécuter dans l'ordre :
    - `Back-End/src/main/resources/data/dev-suivi.sql` (création du schéma)
    - `Back-End/src/main/resources/data/init-dev-suivi.sql` (jeu de données de test)
+
 2. **Back-End** (port 8080) :
+
    ```bash
    cd Back-End
    ./gradlew bootRun
    ```
+
 3. **Front-End** (port 3000) :
+
    ```bash
    cd Front-End
    pnpm install
    pnpm dev
    ```
-4. Ouvrir http://localhost:3000 et se connecter avec un compte de test (voir [Back-End/README](Back-End/README)).
+
+4. Ouvrir `http://localhost:3000` et se connecter avec un compte de test (voir [Back-End/README.md](Back-End/README.md#comptes-de-test)).
 
 ## Architecture
 
-```
-Navigateur ──► Nuxt (localhost:3000) ──REST/JSON + JWT──► Spring Boot (localhost:8080) ──JPA──► PostgreSQL
+```mermaid
+flowchart LR
+    B["Navigateur"] --> N["Nuxt<br/>localhost:3000"]
+    N -->|"REST/JSON + JWT"| S["Spring Boot<br/>localhost:8080"]
+    S -->|JPA| P[("PostgreSQL")]
 ```
 
 - Back-End en couches : `Controller` → `Service` → `Repository`, avec des DTO (records) et des mappers MapStruct.
@@ -44,14 +53,48 @@ Navigateur ──► Nuxt (localhost:3000) ──REST/JSON + JWT──► Spring
 
 ## Modèle de données
 
+```mermaid
+erDiagram
+    USERS {
+        int id_user PK
+        string first_name
+        string last_name
+        string email
+        string password
+        string roles
+    }
+    SERVER {
+        int id_server PK
+        string name
+        string description
+    }
+    PROJECT {
+        int id_project PK
+        string name
+        string description
+        int quota
+        string status
+        int id_server FK
+    }
+    ASSIGN {
+        int id_user FK
+        int id_project FK
+    }
+    CONTRIBUTION {
+        int id_contribution PK
+        int duration
+        date date_contribution
+        int id_project FK
+        int id_user FK
+    }
+    SERVER ||--o{ PROJECT : "héberge"
+    USERS ||--o{ ASSIGN : "est affecté"
+    PROJECT ||--o{ ASSIGN : "a pour membres"
+    USERS ||--o{ CONTRIBUTION : "déclare"
+    PROJECT ||--o{ CONTRIBUTION : "reçoit"
 ```
-Users (id_user, first_name, last_name, email, password, roles[])
-Server (id_server, name, description)
-Project (id_project, name, description, quota, status, id_server → Server)
-Assign (id_user → Users, id_project → Project)              -- affectation développeur ↔ projet
-Contribution (id_contribution, duration, date_contribution,
-              id_project → Project, id_user → Users)
-```
+
+`ASSIGN` est l'affectation développeur ↔ projet. `roles` contient une liste de rôles par utilisateur.
 
 ## Rôles
 

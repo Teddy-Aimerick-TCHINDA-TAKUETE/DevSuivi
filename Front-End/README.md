@@ -6,13 +6,13 @@ Interface web de l'application de suivi d'activités de développeurs.
 
 - Nuxt 4, Vue 3, Vue Router, TypeScript
 - pnpm (lockfile `pnpm-lock.yaml`)
-- CSS maison (`app/assets/css/style.css`, `theme.css`)
+- [Pico CSS](https://picocss.com/) 2 (chargé via CDN) et un thème personnalisé (`app/assets/css/theme.css`)
 
 ## Prérequis
 
 - Node.js (LTS)
 - pnpm
-- Le Back-End démarré sur http://localhost:8080 (voir [../Back-End/README](../Back-End/README))
+- Le Back-End démarré sur `http://localhost:8080` (voir [Back-End](../Back-End/README.md))
 
 ## Installation et lancement
 
@@ -29,15 +29,17 @@ Le front doit tourner sur le port 3000 : c'est la seule origine autorisée par l
 
 ## Structure
 
-```
+```text
 app/
 ├── pages/          Routes (routage par fichiers Nuxt)
 ├── layouts/        default (barre de navigation), loginLayout, minimal
-├── components/     Cartes et tableaux réutilisables (ProjectCards, ContributionTable, UserCards, EntityPicker, DataState...)
+├── components/     Cartes et tableaux réutilisables
+│                   (ProjectCards, ContributionTable, UserCards, EntityPicker, DataState...)
 ├── composables/    useApiXxx : appels REST par ressource ; useAuth : lecture du JWT et des rôles
 ├── middleware/     auth.global.ts : redirection vers /login et contrôle d'accès par rôle
 ├── types/          Types TypeScript alignés sur les DTO du Back-End
-└── utils/          Format d'affichage, stockage des jetons en cookies
+├── utils/          Format d'affichage, stockage des jetons en cookies
+└── error.vue       Page d'erreur (404 / 403)
 ```
 
 ## Authentification
@@ -45,7 +47,7 @@ app/
 1. `/login` envoie email et mot de passe à `POST /auth/login`.
 2. L'access token et le refresh token sont stockés dans les cookies `accessToken` et `refreshToken`.
 3. `useAuth()` décode le JWT côté client (expiration, claim `roles`) et expose `isLoggedIn`, `roles` et `hasRole(...)`.
-4. Chaque appel API envoie `Authorization: Bearer <accessToken>`.
+4. Les appels aux routes protégées envoient `Authorization: Bearer <accessToken>`.
 
 ## Plan du site
 
