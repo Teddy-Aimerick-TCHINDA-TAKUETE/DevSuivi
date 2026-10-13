@@ -1,0 +1,77 @@
+# DevSuivi — Front-End
+
+Interface web de l'application de suivi d'activités de développeurs.
+
+## Technologies
+
+- Nuxt 4, Vue 3, Vue Router, TypeScript
+- pnpm (lockfile `pnpm-lock.yaml`)
+- CSS maison (`app/assets/css/style.css`, `theme.css`)
+
+## Prérequis
+
+- Node.js (LTS)
+- pnpm
+- Le Back-End démarré sur http://localhost:8080 (voir [../Back-End/README](../Back-End/README))
+
+## Installation et lancement
+
+```bash
+pnpm install     # installe les dépendances (lance aussi nuxt prepare)
+pnpm dev         # serveur de développement sur http://localhost:3000
+pnpm build       # build de production
+pnpm preview     # prévisualise le build de production
+```
+
+L'URL de l'API se règle dans [nuxt.config.ts](nuxt.config.ts) (`runtimeConfig.public.apiBase`, par défaut `http://localhost:8080`). On peut aussi la surcharger avec la variable d'environnement `NUXT_PUBLIC_API_BASE`.
+
+Le front doit tourner sur le port 3000 : c'est la seule origine autorisée par le CORS du Back-End.
+
+## Structure
+
+```
+app/
+├── pages/          Routes (routage par fichiers Nuxt)
+├── layouts/        default (barre de navigation), loginLayout, minimal
+├── components/     Cartes et tableaux réutilisables (ProjectCards, ContributionTable, UserCards, EntityPicker, DataState...)
+├── composables/    useApiXxx : appels REST par ressource ; useAuth : lecture du JWT et des rôles
+├── middleware/     auth.global.ts : redirection vers /login et contrôle d'accès par rôle
+├── types/          Types TypeScript alignés sur les DTO du Back-End
+└── utils/          Format d'affichage, stockage des jetons en cookies
+```
+
+## Authentification
+
+1. `/login` envoie email et mot de passe à `POST /auth/login`.
+2. L'access token et le refresh token sont stockés dans les cookies `accessToken` et `refreshToken`.
+3. `useAuth()` décode le JWT côté client (expiration, claim `roles`) et expose `isLoggedIn`, `roles` et `hasRole(...)`.
+4. Chaque appel API envoie `Authorization: Bearer <accessToken>`.
+
+## Plan du site
+
+### Développeur (espace `/user/me`)
+
+| Route | Page |
+|---|---|
+| `/user/me` | Mon espace |
+| `/user/me/contributions` | Mes contributions (liste, ajout, détail) |
+| `/user/me/projets` | Mes projets (liste, détail, membres, contributions) |
+| `/profil` | Mon profil |
+
+### Responsable
+
+| Route | Page | Rôles |
+|---|---|---|
+| `/projet` | Projets : liste, détail (temps cumulé / quota), création, modification, membres, contributions | ADMIN, MANAGER |
+| `/contribution` | Toutes les contributions | ADMIN, MANAGER |
+| `/assign` | Affectations développeur ↔ projet | ADMIN, MANAGER |
+| `/user` | Gestion des comptes utilisateurs | ADMIN |
+| `/serveur` | Gestion des serveurs et projets hébergés | ADMIN |
+
+Le middleware `auth.global.ts` renvoie une erreur 403 si l'utilisateur ouvre une section sans le rôle requis. Un non-admin n'accède qu'aux projets auxquels il est affecté et qu'à ses propres contributions.
+
+## À faire
+
+- Afficher clairement le dépassement de quota dans la liste des projets (le détail montre déjà une barre temps cumulé / quota).
+- Créer le tableau de bord du responsable (temps par développeur sur une période, projets en dépassement, projets clôturés récemment).
+- Supprimer les pages obsolètes `user/me/contributions-old.vue` et `user/me/projets-old.vue`.
