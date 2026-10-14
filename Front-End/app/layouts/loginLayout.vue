@@ -8,14 +8,10 @@
         </ul>
         <ul>
           <template v-if="isLoggedIn">
-            <!-- <li v-for="l in links" :key="l.to">
-              <NuxtLink :to="l.to" active-class="ap-active">{{
-                l.label
-              }}</NuxtLink>
-            </li> -->
             <li>
               <NuxtLink to="/profil" active-class="ap-active">Profil</NuxtLink>
             </li>
+            <li><RoleBadge /></li>
           </template>
           <li v-else>
             <NuxtLink to="/login" role="button" class="ap-btn ap-sm"
@@ -42,25 +38,7 @@
 <script setup lang="ts">
   import { useAuth } from '~/composables/useAuth'
 
-  const { isLoggedIn, hasRole } = useAuth()
-
-  const links = computed(
-    () => [
-      // { to: '/project', label: 'Projets', show: true },
-      // { to: '/server', label: 'Serveurs', show: hasRole('ADMIN') },
-      // { to: '/user', label: 'Utilisateurs', show: hasRole('ADMIN') },
-      // {
-      //   to: '/contribution',
-      //   label: 'Contributions',
-      //   show: hasRole('ADMIN', 'MANAGER'),
-      // },
-      // {
-      //   to: '/assign',
-      //   label: 'Affectations',
-      //   show: hasRole('ADMIN', 'MANAGER'),
-      // },
-    ], //.filter((l) => l.show),
-  )
+  const { isLoggedIn } = useAuth()
 </script>
 
 <style>

@@ -16,6 +16,7 @@
             <li>
               <NuxtLink to="/profil" active-class="ap-active">Profil</NuxtLink>
             </li>
+            <li><RoleBadge /></li>
           </template>
           <li v-else>
             <NuxtLink to="/login" role="button" class="ap-btn ap-sm"
