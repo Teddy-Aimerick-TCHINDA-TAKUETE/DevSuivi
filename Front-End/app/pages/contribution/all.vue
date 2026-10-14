@@ -43,7 +43,7 @@
                 <!-- <td class="ap-muted">{{ c.id }}</td> -->
                 <td>{{ formatDate(c.dateContribution) }}</td>
                 <td>
-                  <span class="ap-pill">{{ c.duration }}</span>
+                  <span class="ap-pill">{{ formatDuration(c.duration) }}</span>
                 </td>
                 <td class="ap-cell-actions">
                   <NuxtLink

@@ -33,7 +33,7 @@
       >
         <div class="ap-grid">
           <article class="ap-stat" :class="{ 'ap-over': overQuota }">
-            <strong>{{ totalDuration }}</strong
+            <strong>{{ formatDuration(totalDuration) }}</strong
             ><span>Durée cumulée du projet</span>
             <OverQuotaPill
               :used="totalDuration"
@@ -41,6 +41,7 @@
             />
           </article>
         </div>
+
         <DateFilter
           v-model:from="from"
           v-model:to="to"
@@ -84,6 +85,7 @@
     (projects.value ?? []).map((p) => ({ id: p.id, label: p.name })),
   )
   const current = computed(() => projects.value?.find((p) => p.id === id))
+  // Durée cumulée de toutes les contributions du projet (le filtre par date ne la change pas)
   const totalDuration = computed(() => sumDuration(contributions.value))
   const overQuota = computed(
     () =>

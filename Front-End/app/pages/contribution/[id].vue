@@ -24,7 +24,7 @@
         <template v-if="contribution">
           <div class="ap-grid">
             <article class="ap-stat">
-              <strong>{{ contribution.duration }}</strong
+              <strong>{{ formatDuration(contribution.duration) }}</strong
               ><span>Durée</span>
             </article>
             <article class="ap-stat">

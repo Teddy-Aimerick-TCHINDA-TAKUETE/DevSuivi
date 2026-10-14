@@ -106,7 +106,7 @@ src/main/java/devSuivi/
 
 ## Données métier
 
-- `Project.quota` : quota en minutes. `Contribution.duration` : durée en minutes.
+- `Project.quota` : quota en heures. `Contribution.duration` : durée en minutes.
 - `Project.status` : `PLANNED`, `IN_PROGRESS`, `PAUSE`, `FINISH` (clôturé), `CANCELED`. Le jeu de test utilise `PLANNED`, `IN_PROGRESS` et `FINISH`.
 - Supprimer un projet ou un utilisateur supprime en cascade ses affectations et ses contributions. Supprimer un serveur supprime aussi ses projets.
 

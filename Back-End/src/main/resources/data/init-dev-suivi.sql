@@ -108,6 +108,6 @@ INSERT INTO Contribution (id_contribution, duration, date_contribution, id_proje
 (28, 180, '2026-09-30', 9, 15),
 (29, 360, '2026-09-30', 4, 12),
 (30, 480, '2026-09-30', 6, 8),
-(31, 444, '2026-11-14', 11, 16);
+(31, 444, '2025-11-14', 11, 16);
 
 ALTER TABLE Contribution      ALTER COLUMN id_contribution     RESTART WITH 32;

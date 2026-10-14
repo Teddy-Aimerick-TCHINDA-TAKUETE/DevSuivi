@@ -62,6 +62,18 @@ export const roleTone = (role = '') => {
   }
 }
 
+/**
+ * Durée d'une contribution (en minutes) lisible : 45 → "45 min", 120 → "2 h",
+ * 444 → "7 h 24".
+ */
+export const formatDuration = (minutes = 0) => {
+  const total = Math.round(minutes)
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h === 0) return `${m} min`
+  return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, '0')}`
+}
+
 export const ALL_ROLES = ['ADMIN', 'MANAGER', 'DEVELOPER'] as const
 
 export const parseRoles = (value: string) =>

@@ -30,7 +30,7 @@
               <tr>
                 <th>Nom</th>
                 <th>Statut</th>
-                <th>Quota</th>
+                <th>Quota (h)</th>
                 <th>Serveur</th>
                 <th></th>
               </tr>
@@ -49,7 +49,7 @@
                   <OverQuotaPill :used="p.totalDuration" :quota="p.quota" />
                   <ProjectStatusSelect :project="p" @changed="refresh()" />
                 </td>
-                <td>{{ p.quota }}</td>
+                <td>{{ p.quota }} h</td>
                 <td>
                   <NuxtLink v-if="p.server" :to="`/server/${p.server.id}`">{{
                     p.server.name

@@ -25,8 +25,7 @@
             ><span>Projets</span>
           </article>
           <article class="ap-stat">
-            <strong>{{ totalQuota }}</strong
-            ><span>Quota cumulé</span>
+            <strong>{{ totalQuota }} h</strong><span>Quota cumulé</span>
           </article>
           <article class="ap-stat">
             <strong>{{ serverCount }}</strong

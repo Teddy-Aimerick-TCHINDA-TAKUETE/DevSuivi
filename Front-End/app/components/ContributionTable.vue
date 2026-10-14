@@ -12,7 +12,7 @@
         <tr v-for="c in items" :key="c.id">
           <td>{{ formatDate(c.dateContribution) }}</td>
           <td>
-            <span class="ap-pill">{{ c.duration }}</span>
+            <span class="ap-pill">{{ formatDuration(c.duration) }}</span>
           </td>
           <td class="ap-cell-actions">
             <NuxtLink :to="`/contribution/${c.id}`">Détails →</NuxtLink>

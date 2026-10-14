@@ -36,15 +36,14 @@
               <span>Statut</span>
             </article>
             <article class="ap-stat">
-              <strong>{{ project.quota }}</strong
-              ><span>Quota</span>
+              <strong>{{ project.quota }} h</strong><span>Quota</span>
             </article>
             <article class="ap-stat">
               <strong>{{ project.users?.length ?? 0 }}</strong
               ><span>Membres</span>
             </article>
             <article class="ap-stat" :class="{ 'ap-over': overQuota }">
-              <strong>{{ usedTime }}</strong
+              <strong>{{ formatDuration(usedTime) }}</strong
               ><span>Durée cumulée</span>
               <OverQuotaPill :used="usedTime" :quota="project.quota" />
             </article>
@@ -54,7 +53,7 @@
             Durée cumulée / quota
             <progress
               :value="usedTime"
-              :max="project.quota || 1"
+              :max="quotaInMinutes(project.quota) || 1"
               :style="
                 overQuota ? { '--pico-progress-color': '#dc2626' } : undefined
               "
@@ -116,7 +115,11 @@
 
 <script setup lang="ts">
   import { errorMessage, statusTone } from '~/utils/format'
-  import { isOverQuota, sumDuration } from '~/utils/projectRules'
+  import {
+    isOverQuota,
+    quotaInMinutes,
+    sumDuration,
+  } from '~/utils/projectRules'
 
   const id = Number(useRoute().params.id)
   const { getProjectById, deleteProject } = useApiProject()

@@ -18,7 +18,7 @@
     </button>
     <small class="ap-muted date-filter-summary">
       {{ count }} contribution{{ count > 1 ? 's' : '' }} · durée cumulée
-      <strong>{{ total }}</strong>
+      <strong>{{ formatDuration(total) }}</strong>
     </small>
   </div>
 </template>

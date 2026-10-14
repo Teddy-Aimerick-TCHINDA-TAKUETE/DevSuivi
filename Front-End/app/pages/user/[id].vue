@@ -43,7 +43,7 @@
           <template v-if="isDeveloper">
             <div class="ap-grid">
               <article class="ap-stat">
-                <strong>{{ totalDuration }}</strong
+                <strong>{{ formatDuration(totalDuration) }}</strong
                 ><span>Durée cumulée de ses contributions</span>
               </article>
             </div>

@@ -25,7 +25,7 @@
           </label>
           <div class="ap-form-grid">
             <label>
-              Quota
+              Quota (en heures)
               <input
                 v-model.number="form.quota"
                 type="number"

@@ -55,7 +55,7 @@
               <input v-model="form.date" type="date" required />
             </label>
             <label>
-              Durée
+              Durée (en minutes)
               <input
                 v-model.number="form.duration"
                 type="number"

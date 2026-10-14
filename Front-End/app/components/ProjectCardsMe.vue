@@ -14,7 +14,7 @@
           }}</span>
           <OverQuotaPill :used="p.totalDuration" :quota="p.quota" />
         </span>
-        <small class="ap-muted">Quota {{ p.quota }}</small>
+        <small class="ap-muted">Quota {{ p.quota }} h</small>
       </div>
       <h4>{{ p.name }}</h4>
       <p>{{ p.description }}</p>

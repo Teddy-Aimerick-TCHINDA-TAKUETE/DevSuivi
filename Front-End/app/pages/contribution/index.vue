@@ -22,11 +22,11 @@
             ><span>Contributions</span>
           </article>
           <article class="ap-stat">
-            <strong>{{ total }}</strong
+            <strong>{{ formatDuration(total) }}</strong
             ><span>Durée totale</span>
           </article>
           <article class="ap-stat">
-            <strong>{{ average }}</strong
+            <strong>{{ formatDuration(average) }}</strong
             ><span>Durée moyenne</span>
           </article>
         </div>
