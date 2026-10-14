@@ -78,6 +78,7 @@ public class AssignService {
     public AssignListDto saveAssign(AssignIdNewDto assignIdNewDto){
         var assignId =assignMapper.toAssignId(assignIdNewDto);
         User user = userService.getEntityUserById(assignId.getUser());
+        userService.verifierDeveloper(user, "être affecté à un projet");
         Project project = projectService.getEntityProjectById(assignId.getProject());
         Assign assign = new Assign(user, project);
         var saved = assignRepositoty.save(assign);

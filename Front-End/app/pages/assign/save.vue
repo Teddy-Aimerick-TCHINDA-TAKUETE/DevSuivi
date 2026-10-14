@@ -11,8 +11,8 @@
             Utilisateur
             <select v-model.number="form.user" required>
               <option :value="0" disabled>Choisir un utilisateur…</option>
-              <option v-for="u in users" :key="u.id" :value="u.id">
-                {{ fullName(u) }} — {{ u.email }}
+              <option v-for="u in developers" :key="u.id" :value="u.id">
+                {{ fullName(u) }}
               </option>
             </select>
           </label>
@@ -66,8 +66,12 @@
   // Préremplissable via /assign/save?user=1&project=2
   const route = useRoute()
   const { saveAssign } = useApiAssign()
-  const { getAllUsers, fetchProjectsOfUser } = useApiUser()
+  const { getAllUsers, getProjetByUserId } = useApiUser()
   const { data: users } = await getAllUsers()
+  // Seuls les développeurs peuvent être affectés à un projet ou saisir du temps
+  const developers = computed(() =>
+    (users.value ?? []).filter((u) => u.roles?.includes('DEVELOPER')),
+  )
   const { data: projects } = await useApiProject().getAllProjects()
 
   const form = reactive({
@@ -88,8 +92,8 @@
       }
       loadingProjects.value = true
       try {
-        const assigned = await fetchProjectsOfUser(userId)
-        const ids = new Set(assigned.map((p) => p.id))
+        const { data: assigned } = await getProjetByUserId(userId)
+        const ids = new Set(assigned.value?.map((p) => p.id))
         availableProjects.value = (projects.value ?? []).filter(
           (p) => !ids.has(p.id),
         )

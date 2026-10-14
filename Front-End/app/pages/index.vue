@@ -71,8 +71,7 @@
         label: 'Mes projets',
         text: 'Suivre l’avancement, les quotas et les équipes.',
         count: mesProjects.value?.length,
-        show: true,
-        //show: hasRole('DEVELOPER'),
+        show: hasRole('DEVELOPER'),
       },
       {
         to: '/user/me/contributions',
@@ -80,7 +79,7 @@
         label: 'Mes contributions',
         text: 'Le temps passé sur chaque projet.',
         count: mesContributions.value?.length,
-        show: true,
+        show: hasRole('DEVELOPER'),
       },
       {
         to: '/projet',

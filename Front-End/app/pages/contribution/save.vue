@@ -11,7 +11,7 @@
             Utilisateur
             <select v-model.number="form.idUser" required>
               <option :value="0" disabled>Choisir un utilisateur…</option>
-              <option v-for="u in users" :key="u.id" :value="u.id">
+              <option v-for="u in developers" :key="u.id" :value="u.id">
                 {{ fullName(u) }}
               </option>
             </select>
@@ -84,8 +84,12 @@
   const id = Number(route.query.id) || null
   const { getContributionById, saveContribution, updateContribution } =
     useApiContribution()
-  const { getAllUsers, fetchProjectsOfUser } = useApiUser()
+  const { getAllUsers, getProjetByUserId } = useApiUser()
   const { data: users } = await getAllUsers()
+  // Seuls les développeurs peuvent être affectés à un projet ou saisir du temps
+  const developers = computed(() =>
+    (users.value ?? []).filter((u) => u.roles?.includes('DEVELOPER')),
+  )
   const existing = id ? await getContributionById(id) : null
 
   const form = reactive({
@@ -127,7 +131,8 @@
       }
       loadingProjects.value = true
       try {
-        projects.value = await fetchProjectsOfUser(userId)
+        const { data } = await getProjetByUserId(userId)
+        projects.value = data.value ?? []
       } catch {
         projects.value = []
       }

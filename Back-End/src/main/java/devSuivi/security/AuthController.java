@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -42,7 +44,9 @@ public class AuthController {
                     content =  @Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailDto.class)) )
     } )
     public ResponseEntity<UserDetailDto> register(@RequestBody @Valid UserNewDto userNewDto) {
-        return new ResponseEntity<>(userService.saveUser(userNewDto), HttpStatus.CREATED);
+        var dto = new UserNewDto(userNewDto.firstName(), userNewDto.lastName(),
+                userNewDto.email(), userNewDto.password(), List.of("DEVELOPER"));
+        return new ResponseEntity<>(userService.saveUser(dto), HttpStatus.CREATED);
     }
 
     @PostMapping("/refresh")

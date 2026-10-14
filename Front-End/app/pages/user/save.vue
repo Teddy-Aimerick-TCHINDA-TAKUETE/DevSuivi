@@ -37,12 +37,18 @@
           <fieldset>
             <legend>Rôles</legend>
             <label v-for="r in ALL_ROLES" :key="r">
-              <input v-model="form.roles" type="checkbox" :value="r" />
+              <input
+                v-model="form.roles"
+                type="checkbox"
+                :value="r"
+                :disabled="isRoleDisabled(r)"
+              />
               {{ r }}
             </label>
             <small
               >Facultatif : sans rôle coché, l’utilisateur est
-              <strong>DEVELOPER</strong>.</small
+              <strong>DEVELOPER</strong>. DEVELOPER ne se cumule ni avec ADMIN
+              ni avec MANAGER ; ADMIN et MANAGER peuvent se cumuler.</small
             >
           </fieldset>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
@@ -103,6 +109,18 @@
       /^\S+@\S+\.\S+$/.test(form.email.trim()) &&
       form.password !== '',
   )
+
+  // DEVELOPER est exclusif : coché, il bloque ADMIN et MANAGER, et inversement.
+  // Si un compte existant cumule déjà les rôles (ex. compte de test), rien n'est
+  // bloqué : on peut décocher librement pour revenir à une combinaison valide.
+  const isDeveloper = computed(() => form.roles.includes('DEVELOPER'))
+  const isManagement = computed(
+    () => form.roles.includes('ADMIN') || form.roles.includes('MANAGER'),
+  )
+  function isRoleDisabled(role: string) {
+    if (isDeveloper.value && isManagement.value) return false
+    return role === 'DEVELOPER' ? isManagement.value : isDeveloper.value
+  }
 
   const submitting = ref(false)
   const message = ref('')

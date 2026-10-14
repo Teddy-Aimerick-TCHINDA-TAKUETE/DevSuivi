@@ -54,9 +54,9 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserProfil(authentication.getName()), HttpStatus.OK);
     }
 
-    @GetMapping("/{id:[\\d]+}/projects")
-    public List<ProjectListDto> getProjectsByUserId(@PathVariable Long id){
-        return userService.getProjectsByUserId(id);
+    @GetMapping("/{id:[\\d]+}/projets")
+    public List<ProjectListDto> getProjetsByUserId(@PathVariable Long id){
+        return userService.getProjetsByUserId(id);
     }
 
     @GetMapping("/{id:[\\d]+}/contributions")

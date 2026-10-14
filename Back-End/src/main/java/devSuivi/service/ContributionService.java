@@ -53,6 +53,7 @@ public class ContributionService {
     public ContributionDetailDto saveContribution(ContributionNewDto contributionNewDto){
         var contribution = contributionMapper.toContribution(contributionNewDto);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
+        userService.verifierDeveloper(user, "déclarer une contribution");
         var project = projectService.getEntityProjectById(contributionNewDto.idProject());
         contribution.setUser(user);
         contribution.setProject(project);
@@ -67,6 +68,7 @@ public class ContributionService {
         var contribution = getEntityContributionById(id);
         contributionMapper.update(contributionNewDto, contribution);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
+        userService.verifierDeveloper(user, "déclarer une contribution");
         var project = projectService.getEntityProjectById(contributionNewDto.idProject());
         contribution.setUser(user);
         contribution.setProject(project);

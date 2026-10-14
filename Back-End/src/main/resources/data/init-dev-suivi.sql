@@ -11,11 +11,16 @@ DELETE FrOM Users;
 CREATE SCHEMA IF NOT EXISTS ext;
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA ext;
 
+-- Règles sur les rôles :
+--   * DEVELOPER est exclusif : seul un développeur peut être affecté à un projet
+--     et saisir des contributions ;
+--   * combinaisons autorisées : ADMIN, MANAGER, ADMIN + MANAGER, DEVELOPER ;
+--   * exception de test : Teddy cumule les trois rôles.
 -- A. Utilisateurs (Membres d'une équipe produit / tech)
 INSERT INTO Users (id_user, first_name, last_name, email, password, roles) VALUES
 (1, 'Alice', 'Martin', 'alice.martin@company.com', ext.crypt( 'alice_martin', ext.gen_salt('bf')), ARRAY['ADMIN', 'MANAGER']),
 (2, 'Thomas', 'Dubois', 'thomas.dubois@company.com', ext.crypt( 'thomas_dubois', ext.gen_salt('bf')), ARRAY['MANAGER']),
-(3, 'Sophie', 'Bernard', 'sophie.bernard@company.com', ext.crypt( 'sophie_bernard', ext.gen_salt('bf')), ARRAY['MANAGER', 'DEVELOPER']),
+(3, 'Sophie', 'Bernard', 'sophie.bernard@company.com', ext.crypt( 'sophie_bernard', ext.gen_salt('bf')), ARRAY['DEVELOPER']),
 (4, 'Lucas', 'Moreau', 'lucas.moreau@company.com', ext.crypt( 'lucas_moreau', ext.gen_salt('bf')), ARRAY['DEVELOPER']),
 (5, 'Emma', 'Petit', 'emma.petit@company.com', ext.crypt( 'emma_petit', ext.gen_salt('bf')), ARRAY['DEVELOPER']),
 (6, 'Alexandre', 'Roux', 'alexandre.roux@company.com', ext.crypt( 'alex_roux', ext.gen_salt('bf')), ARRAY['DEVELOPER']),
@@ -60,16 +65,16 @@ INSERT INTO Project (id_project, name, description, quota, status, id_server) VA
 
 ALTER TABLE Project      ALTER COLUMN id_project     RESTART WITH 12;
 
--- D. Assignation des utilisateurs aux projets
+-- D. Assignation des utilisateurs aux projets (développeurs uniquement)
 INSERT INTO Assign (id_user, id_project) VALUES
-(2, 1), (3, 1), (3, 2), (4, 2), (5, 3), (4, 4), (3, 5),
+(5, 1), (3, 1), (3, 2), (4, 2), (5, 3), (4, 4), (3, 5),
 (6, 6), (8, 6), (9, 7), (11, 7), (12, 4), (14, 8), (15, 9),
-(7, 8), (10, 9), (1, 10), (13, 10), (6, 7), (8, 4), (16, 11);
+(12, 8), (14, 9), (11, 10), (9, 10), (6, 7), (8, 4), (16, 11);
 
--- E. Saisie des temps / contributions (en minutes)
+-- E. Saisie des temps / contributions (en minutes), par des développeurs affectés au projet
 INSERT INTO Contribution (id_contribution, duration, date_contribution, id_project, id_user) VALUES
 -- Semaines précédentes
-(1, 240, '2026-09-14', 1, 2),
+(1, 240, '2026-09-14', 1, 5),
 (2, 420, '2026-09-14', 1, 3),
 (3, 360, '2026-09-15', 2, 4),
 (4, 480, '2026-09-16', 3, 5),
@@ -79,7 +84,7 @@ INSERT INTO Contribution (id_contribution, duration, date_contribution, id_proje
 (8, 240, '2026-09-18', 7, 9),
 
 -- Semaine courante
-(9, 300, '2026-09-21', 1, 2),
+(9, 300, '2026-09-21', 1, 5),
 (10, 450, '2026-09-21', 1, 3),
 (11, 240, '2026-09-22', 4, 4),
 (12, 360, '2026-09-23', 2, 4),
@@ -87,7 +92,7 @@ INSERT INTO Contribution (id_contribution, duration, date_contribution, id_proje
 (14, 300, '2026-09-24', 7, 11),
 (15, 480, '2026-09-25', 4, 12),
 (16, 210, '2026-09-25', 9, 15),
-(17, 360, '2026-09-25', 9, 10),
+(17, 360, '2026-09-25', 9, 14),
 (18, 180, '2026-09-28', 8, 14),
 
 -- Récents
@@ -95,11 +100,11 @@ INSERT INTO Contribution (id_contribution, duration, date_contribution, id_proje
 (20, 300, '2026-09-28', 7, 9),
 (21, 240, '2026-09-29', 4, 8),
 (22, 360, '2026-09-29', 1, 3),
-(23, 480, '2026-09-29', 10, 1),
-(24, 210, '2026-09-29', 10, 13),
+(23, 480, '2026-09-29', 10, 11),
+(24, 210, '2026-09-29', 10, 9),
 (25, 300, '2026-09-30', 2, 4),
 (26, 420, '2026-09-30', 7, 6),
-(27, 240, '2026-09-30', 8, 7),
+(27, 240, '2026-09-30', 8, 12),
 (28, 180, '2026-09-30', 9, 15),
 (29, 360, '2026-09-30', 4, 12),
 (30, 480, '2026-09-30', 6, 8),

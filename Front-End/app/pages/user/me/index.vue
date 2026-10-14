@@ -29,9 +29,7 @@
 
           <div class="ap-section-title">
             <h3>Projets</h3>
-            <NuxtLink :to="`/user/me/projets?id=${user.id}`"
-              >Voir tout →</NuxtLink
-            >
+            <NuxtLink :to="`/user/me/projets`">Voir tout →</NuxtLink>
           </div>
           <ProjectCardsMe v-if="projects?.length" :items="projects" />
           <p v-else class="ap-empty ap-muted">
@@ -40,9 +38,7 @@
 
           <div class="ap-section-title">
             <h3>Contributions</h3>
-            <NuxtLink :to="`/user/me/contributions?id=${user.id}`"
-              >Voir tout →</NuxtLink
-            >
+            <NuxtLink :to="`/user/me/contributions`">Voir tout →</NuxtLink>
           </div>
           <ContributionTableMe
             v-if="contributions?.length"
