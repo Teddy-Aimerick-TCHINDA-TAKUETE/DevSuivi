@@ -47,6 +47,11 @@
               ><span>Durée cumulée</span>
               <OverQuotaPill :used="usedTime" :quota="project.quota" />
             </article>
+            <article class="ap-stat" :class="{ 'ap-over': overQuota }">
+              <strong>{{ formatDuration(myUsedTime) }}</strong
+              ><span>Ma durée cumulée</span>
+              <OverQuotaPill :used="usedTime" :quota="project.quota" />
+            </article>
           </div>
 
           <label>
@@ -86,8 +91,8 @@
             >
           </div>
           <ContributionTableMe
-            v-if="project.contributions?.length"
-            :items="project.contributions"
+            v-if="myContributions.length"
+            :items="myContributions"
           />
           <p v-else class="ap-empty ap-muted">
             Aucune contribution enregistrée.
@@ -125,29 +130,22 @@
   const { getProjectById, deleteProject } = useApiProject()
   const { data: project, status, error } = await getProjectById(id)
   const message = ref('')
+  const { data: user } = await useApiUser().getUserProfil()
+  const { data: mine } = await useApiUser().getContributionByUserId(
+    user.value?.id ?? 0,
+  )
+
+  const myContributions = computed(() => {
+    const ids = new Set((mine.value ?? []).map((c) => c.id))
+    return (project.value?.contributions ?? []).filter((c) => ids.has(c.id))
+  })
 
   const usedTime = computed(() => sumDuration(project.value?.contributions))
+  const myUsedTime = computed(() => sumDuration(myContributions.value))
   // Dépassement : durée cumulée > quota (signalement, l'état ne change pas)
   const overQuota = computed(() =>
     isOverQuota(usedTime.value, project.value?.quota),
   )
-
-  async function remove() {
-    if (
-      !(await askConfirm({
-        title: 'Supprimer le projet',
-        message: `« ${project.value?.name} » sera supprimé définitivement, ainsi que ses affectations et ses contributions.`,
-        confirmLabel: 'Supprimer',
-      }))
-    )
-      return
-    const { error: err } = await deleteProject(id)
-    if (err.value) {
-      message.value = errorMessage(err.value)
-      return
-    }
-    await navigateTo('/project/all')
-  }
 </script>
 
 <style scoped></style>
