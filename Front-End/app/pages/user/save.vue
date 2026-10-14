@@ -27,11 +27,11 @@
               v-model="form.password"
               type="password"
               autocomplete="new-password"
-              required
+              :required="!id"
+              :placeholder="id ? 'Laisser vide pour ne pas le changer' : ''"
             />
             <small v-if="id"
-              >Le mot de passe est requis par l’API, même pour une
-              modification.</small
+              >Laisser vide pour conserver le mot de passe actuel.</small
             >
           </label>
           <fieldset>
@@ -51,6 +51,10 @@
               ni avec MANAGER ; ADMIN et MANAGER peuvent se cumuler.</small
             >
           </fieldset>
+          <p v-if="emailChanged" class="ap-muted" role="status">
+            ⚠️ En changeant votre email, vous serez déconnecté et devrez vous
+            reconnecter avec le nouvel email.
+          </p>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
             {{ message }}
           </p>
@@ -75,8 +79,11 @@
 
   // /user/save → création · /user/save?id=4 → modification
   const id = Number(useRoute().query.id) || null
-  const { getUserById, saveUser, updateUser } = useApiUser()
+  const { getUserById, saveUser, updateUser, getUserProfil } = useApiUser()
   const existing = id ? await getUserById(id) : null
+  const { data: me } = await getUserProfil()
+  const itIsMe = ref<boolean>(false)
+  const originalEmail = ref('')
 
   const form = reactive({
     firstName: '',
@@ -90,6 +97,12 @@
       existing.data,
       (u) => {
         if (!u) return
+        if (
+          me.value?.email.toLocaleLowerCase() === u.email.toLocaleLowerCase()
+        ) {
+          itIsMe.value = true
+          originalEmail.value = u.email
+        }
         Object.assign(form, {
           firstName: u.firstName,
           lastName: u.lastName,
@@ -101,13 +114,20 @@
     )
   }
 
+  const emailChanged = computed(
+    () =>
+      itIsMe.value &&
+      originalEmail.value !== '' &&
+      form.email.trim().toLowerCase() !== originalEmail.value.toLowerCase(),
+  )
+
   // Tous les champs obligatoires doivent être remplis (les rôles sont facultatifs)
   const canSubmit = computed(
     () =>
       form.firstName.trim() !== '' &&
       form.lastName.trim() !== '' &&
       /^\S+@\S+\.\S+$/.test(form.email.trim()) &&
-      form.password !== '',
+      (id ? true : form.password !== ''),
   )
 
   // DEVELOPER est exclusif : coché, il bloque ADMIN et MANAGER, et inversement.
@@ -138,6 +158,11 @@
     if (res.error.value) {
       message.value = errorMessage(res.error.value)
       return
+    }
+    if (emailChanged.value) {
+      getAccessToken().value = null
+      getRefreshToken().value = null
+      return await navigateTo('/login')
     }
     await navigateTo(
       res.data.value?.id ? `/user/${res.data.value.id}` : '/user/all',

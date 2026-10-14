@@ -14,6 +14,7 @@ async function isOwnUserPage(to: { path: string; query: Record<string, any> }) {
   const myId = user.id
   if (!myId) return false
   if (to.path === `/user/me`) return true
+  if (to.path === `/user/me/save`) return true
   if (['/user/me/projects', '/user/me/contributions'].includes(to.path)) {
     return true
   }

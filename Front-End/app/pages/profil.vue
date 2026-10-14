@@ -2,6 +2,9 @@
   <div>
     <AppPage title="Mon profil" subtitle="Informations de votre session.">
       <template #actions>
+        <NuxtLink :to="`/user/me/save`" role="button" class="ap-btn"
+          >Modifier mon profil</NuxtLink
+        >
         <button v-if="me" class="ap-btn ap-ghost" @click="logout">
           Se déconnecter
         </button>

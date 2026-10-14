@@ -84,6 +84,17 @@ public class UserController {
         return new ResponseEntity<>(userService.updateUser(id, userNewDto), HttpStatus.OK);
     }
 
+    @PutMapping("/me")
+    @ApiResponses( {
+            @ApiResponse(responseCode = "200", description = "User trouvé et modifié",
+                    content =  @Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailDto.class)) ),
+            @ApiResponse(responseCode = "404", description = "User non trouvé",
+                    content = @Content)
+    } )
+    public ResponseEntity<UserDetailDto> updateMe(@RequestBody @Valid UserNewDto userNewDto, Authentication authentication){
+        return new ResponseEntity<>(userService.updateMe(userNewDto, authentication), HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id:[\\d]+}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiResponses( {

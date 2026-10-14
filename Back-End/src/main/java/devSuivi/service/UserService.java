@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -137,8 +134,26 @@ public class UserService implements UserDetailsService {
                 .toList();
     }
 
+    /** 409 si l'email est déjà pris par un AUTRE utilisateur. */
+    private void verifierEmailLibre(User user, String nouvelEmail) {
+        if (!user.getEmail().equalsIgnoreCase(nouvelEmail)
+                && userRepository.existsByEmailIgnoreCase(nouvelEmail)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé.");
+        }
+    }
+
+    /** Mot de passe vide ou absent = on garde l'ancien. */
+    private void appliquerMotDePasse(User user, String ancienHash, String nouveau) {
+        user.setPassword(nouveau == null || nouveau.isBlank()
+                ? ancienHash
+                : passwordEncoder.encode(nouveau));
+    }
+
     @Transactional
     public UserDetailDto saveUser(UserNewDto userNewDto) {
+        if (userNewDto.password() == null || userNewDto.password().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le mot de passe est obligatoire.");
+        }
         if (userRepository.existsByEmailIgnoreCase(userNewDto.email())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Cet email est déjà utilisé.");
@@ -157,6 +172,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserDetailDto updateUser(Long id, UserNewDto userNewDto){
         var user = getEntityUserById(id);
+        verifierEmailLibre(user, userNewDto.email());
         // Les rôles ne sont contrôlés que s'ils changent : un compte de test qui cumule
         // déjà les trois rôles (Teddy) reste modifiable tant qu'on n'y touche pas.
         Set<String> rolesActuels = user.getRoles() == null ? Set.of() : new HashSet<>(user.getRoles());
@@ -168,8 +184,26 @@ public class UserService implements UserDetailsService {
                         "Cet utilisateur a des affectations ou des contributions : il doit rester DEVELOPER.");
             }
         }
+        var ancienHash = user.getPassword();
         userMapper.updateUser(userNewDto, user);
-        user.setPassword(passwordEncoder.encode(userNewDto.password()));
+        appliquerMotDePasse(user, ancienHash, userNewDto.password());
+        var saved = userRepository.save(user);
+        List<ProjectListDto> projects = getListProject(saved.getId());
+        List<ContributionListDto> contributionListDtos = saved.getContributions().stream()
+                .map(contributionMapper::toContributionListDto)
+                .toList();
+        return userMapper.toUserDetailDto(saved, projects, contributionListDtos);
+    }
+
+    @Transactional
+    public UserDetailDto updateMe(UserNewDto userNewDto, Authentication authentication){
+        var user = loadUserByUsername(authentication.getName());
+        verifierEmailLibre(user, userNewDto.email());          // remplace le if que je t'avais donné
+        var rolesActuels = user.getRoles() == null ? null : new ArrayList<>(user.getRoles());
+        var ancienHash = user.getPassword();
+        userMapper.updateUser(userNewDto, user);
+        user.setRoles(rolesActuels);
+        appliquerMotDePasse(user, ancienHash, userNewDto.password());
         var saved = userRepository.save(user);
         List<ProjectListDto> projects = getListProject(saved.getId());
         List<ContributionListDto> contributionListDtos = saved.getContributions().stream()

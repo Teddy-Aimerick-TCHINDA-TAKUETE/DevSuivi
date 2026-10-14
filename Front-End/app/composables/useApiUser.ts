@@ -67,6 +67,15 @@ export function useApiUser() {
       body: userNewDto,
     })
   }
+  async function updateMe(userNewDto: UserNewDto) {
+    return await useFetch<UserDetailDto>(() => `${apiBase}/user/me`, {
+      headers: computed(() => ({
+        Authorization: `Bearer ${accessToken.value}`,
+      })),
+      method: 'PUT',
+      body: userNewDto,
+    })
+  }
   async function deleteUser(id: number) {
     return await useFetch(() => `${apiBase}/user/${id}`, {
       headers: computed(() => ({
@@ -83,6 +92,7 @@ export function useApiUser() {
     getContributionByUserId,
     saveUser,
     updateUser,
+    updateMe,
     deleteUser,
   }
 }
