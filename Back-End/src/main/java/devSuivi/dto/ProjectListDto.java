@@ -6,5 +6,6 @@ public record ProjectListDto(
         String description,
         int quota,
         String status,
-        ServerListDto server) {
+        ServerListDto server,
+        long totalDuration) {
 }

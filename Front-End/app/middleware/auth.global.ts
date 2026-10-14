@@ -124,6 +124,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     createError({ statusCode: 403, statusMessage: 'Accès refusé' })
 
   if (
+    (inSection(to.path, '/user/me/projects') ||
+      inSection(to.path, '/user/me/contributions')) &&
+    !hasRole('DEVELOPER')
+  )
+    throw forbidden()
+  if (
     inSection(to.path, '/user') &&
     !hasRole('ADMIN') &&
     !(await isOwnUserPage(to)) &&

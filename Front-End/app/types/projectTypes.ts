@@ -19,6 +19,8 @@ export interface ProjectListDto {
   description: string
   quota: number
   status: string
+  /** Durée cumulée des contributions (renvoyée par le Back-End) */
+  totalDuration?: number
   server: ServerListDto
 }
 

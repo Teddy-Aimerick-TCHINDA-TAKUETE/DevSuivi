@@ -46,6 +46,7 @@
                   <span class="ap-pill" :data-tone="statusTone(p.status)">{{
                     p.status
                   }}</span>
+                  <OverQuotaPill :used="p.totalDuration" :quota="p.quota" />
                   <ProjectStatusSelect :project="p" @changed="refresh()" />
                 </td>
                 <td>{{ p.quota }}</td>

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-10-09T23:12:13+0200",
+    date = "2026-10-14T12:20:25+0200",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.4.1 (Eclipse Adoptium)"
 )
 @Component
@@ -59,7 +59,9 @@ public class ProjectMapperImpl implements ProjectMapper {
         status = project.getStatus();
         server = serverToServerListDto( project.getServer() );
 
-        ProjectListDto projectListDto = new ProjectListDto( id, name, description, quota, status, server );
+        long totalDuration = project.getContributions().stream().mapToLong(c -> c.getDuration()).sum();
+
+        ProjectListDto projectListDto = new ProjectListDto( id, name, description, quota, status, server, totalDuration );
 
         return projectListDto;
     }

@@ -31,13 +31,24 @@
         :empty="!contributions.length"
         empty-text="Aucune contribution sur ce projet."
       >
-        <ContributionTable :items="contributions" />
+        <DateFilter
+          v-model:from="from"
+          v-model:to="to"
+          :count="filtered.length"
+          :total="sumDuration(filtered)"
+        />
+        <p v-if="!filtered.length" class="ap-empty ap-muted">
+          Aucune contribution sur cette période.
+        </p>
+        <ContributionTable v-else :items="filtered" />
       </DataState>
     </AppPage>
   </div>
 </template>
 
 <script setup lang="ts">
+  import { sumDuration } from '~/utils/projectRules'
+
   definePageMeta({ key: (route) => route.fullPath })
 
   const id = Number(useRoute().query.id) || 0
@@ -46,6 +57,12 @@
   const result = id ? await getContributiosByProjectId(id) : null
 
   const contributions = computed(() => result?.data.value ?? [])
+  // Filtre par date (bornes incluses)
+  const from = ref('')
+  const to = ref('')
+  const filtered = computed(() =>
+    filterByDate(contributions.value, from.value, to.value),
+  )
   const pending = computed(() => result?.status.value === 'pending')
   const error = computed(() => result?.error.value)
   const options = computed(() =>

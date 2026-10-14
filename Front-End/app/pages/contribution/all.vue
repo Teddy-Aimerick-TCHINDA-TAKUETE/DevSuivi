@@ -19,7 +19,16 @@
         :empty="!sorted.length"
         empty-text="Aucune contribution enregistrée."
       >
-        <div class="ap-table">
+        <DateFilter
+          v-model:from="from"
+          v-model:to="to"
+          :count="filtered.length"
+          :total="sumDuration(filtered)"
+        />
+        <p v-if="!filtered.length" class="ap-empty ap-muted">
+          Aucune contribution sur cette période.
+        </p>
+        <div v-else class="ap-table">
           <table class="striped">
             <thead>
               <tr>
@@ -30,7 +39,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="c in sorted" :key="c.id">
+              <tr v-for="c in filtered" :key="c.id">
                 <!-- <td class="ap-muted">{{ c.id }}</td> -->
                 <td>{{ formatDate(c.dateContribution) }}</td>
                 <td>
@@ -64,6 +73,7 @@
 
 <script setup lang="ts">
   import { errorMessage, formatDate } from '~/utils/format'
+  import { sumDuration } from '~/utils/projectRules'
 
   const { getAllContributions, deleteContribution } = useApiContribution()
   const {
@@ -78,6 +88,13 @@
     [...(contributions.value ?? [])].sort(
       (a, b) => +new Date(b.dateContribution) - +new Date(a.dateContribution),
     ),
+  )
+
+  // Filtre par date (bornes incluses)
+  const from = ref('')
+  const to = ref('')
+  const filtered = computed(() =>
+    filterByDate(sorted.value, from.value, to.value),
   )
 
   async function remove(id: number) {

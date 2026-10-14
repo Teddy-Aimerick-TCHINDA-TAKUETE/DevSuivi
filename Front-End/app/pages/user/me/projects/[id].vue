@@ -43,15 +43,22 @@
               <strong>{{ project.users?.length ?? 0 }}</strong
               ><span>Membres</span>
             </article>
-            <article class="ap-stat">
+            <article class="ap-stat" :class="{ 'ap-over': overQuota }">
               <strong>{{ usedTime }}</strong
               ><span>Durée cumulée</span>
+              <OverQuotaPill :used="usedTime" :quota="project.quota" />
             </article>
           </div>
 
           <label>
             Durée cumulée / quota
-            <progress :value="usedTime" :max="project.quota || 1" />
+            <progress
+              :value="usedTime"
+              :max="project.quota || 1"
+              :style="
+                overQuota ? { '--pico-progress-color': '#dc2626' } : undefined
+              "
+            />
           </label>
 
           <p v-if="project.server">
@@ -109,17 +116,17 @@
 
 <script setup lang="ts">
   import { errorMessage, statusTone } from '~/utils/format'
+  import { isOverQuota, sumDuration } from '~/utils/projectRules'
 
   const id = Number(useRoute().params.id)
   const { getProjectById, deleteProject } = useApiProject()
   const { data: project, status, error } = await getProjectById(id)
   const message = ref('')
 
-  const usedTime = computed(() =>
-    (project.value?.contributions ?? []).reduce(
-      (sum, c) => sum + c.duration,
-      0,
-    ),
+  const usedTime = computed(() => sumDuration(project.value?.contributions))
+  // Dépassement : durée cumulée > quota (signalement, l'état ne change pas)
+  const overQuota = computed(() =>
+    isOverQuota(usedTime.value, project.value?.quota),
   )
 
   async function remove() {

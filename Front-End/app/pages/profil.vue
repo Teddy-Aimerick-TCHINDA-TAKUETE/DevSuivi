@@ -44,12 +44,14 @@
             >Ma fiche</NuxtLink
           >
           <NuxtLink
+            v-if="hasRole('DEVELOPER')"
             :to="`/user/me/projects`"
             role="button"
             class="ap-btn secondary outline"
             >Mes projets</NuxtLink
           >
           <NuxtLink
+            v-if="hasRole('DEVELOPER')"
             :to="`/user/me/contributions`"
             role="button"
             class="ap-btn secondary outline"
@@ -67,6 +69,7 @@
   const token = getAccessToken()
   const refreshToken = getRefreshToken()
   const { data: user } = await useApiUser().getUserProfil()
+  const { hasRole } = useAuth()
 
   // Lecture "best effort" du JWT (id / email) pour retrouver l'utilisateur connecté
   const claims = computed<Record<string, any> | null>(() => {

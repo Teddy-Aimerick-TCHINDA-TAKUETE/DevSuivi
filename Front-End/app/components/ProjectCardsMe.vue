@@ -8,9 +8,12 @@
       class="ap-card"
     >
       <div class="ap-card-top">
-        <span class="ap-pill" :data-tone="statusTone(p.status)">{{
-          p.status
-        }}</span>
+        <span>
+          <span class="ap-pill" :data-tone="statusTone(p.status)">{{
+            p.status
+          }}</span>
+          <OverQuotaPill :used="p.totalDuration" :quota="p.quota" />
+        </span>
         <small class="ap-muted">Quota {{ p.quota }}</small>
       </div>
       <h4>{{ p.name }}</h4>
@@ -29,6 +32,7 @@
       description: string
       status: string
       quota: number
+      totalDuration?: number
     }[]
   }>()
   const NuxtLink = resolveComponent('NuxtLink')

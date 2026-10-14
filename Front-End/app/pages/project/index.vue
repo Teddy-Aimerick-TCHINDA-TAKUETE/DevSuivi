@@ -35,6 +35,10 @@
             <strong>{{ serverCount }}</strong
             ><span>Serveurs utilisés</span>
           </article>
+          <article class="ap-stat" :class="{ 'ap-over': overCount }">
+            <strong>{{ overCount }}</strong
+            ><span>En dépassement de quota</span>
+          </article>
         </div>
 
         <div class="ap-section-title">
@@ -48,6 +52,8 @@
 </template>
 
 <script setup lang="ts">
+  import { isOverQuota } from '~/utils/projectRules'
+
   const {
     data: projects,
     status,
@@ -59,6 +65,12 @@
   )
   const totalQuota = computed(() =>
     (projects.value ?? []).reduce((sum, p) => sum + (p.quota ?? 0), 0),
+  )
+  const overCount = computed(
+    () =>
+      (projects.value ?? []).filter((p) =>
+        isOverQuota(p.totalDuration, p.quota),
+      ).length,
   )
   const serverCount = computed(
     () => new Set((projects.value ?? []).map((p) => p.server?.id)).size,

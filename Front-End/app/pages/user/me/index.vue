@@ -27,35 +27,49 @@
             </div>
           </article>
 
-          <div class="ap-section-title">
-            <h3>Projets</h3>
-            <NuxtLink :to="`/user/me/projects`">Voir tout →</NuxtLink>
-          </div>
-          <ProjectCardsMe v-if="projects?.length" :items="projects" />
-          <p v-else class="ap-empty ap-muted">
-            Aucun projet pour cet utilisateur.
+          <p v-if="!isDeveloper" class="ap-empty ap-muted">
+            Votre compte n’a pas le rôle DEVELOPER : vous n’avez ni projet ni
+            contribution.
           </p>
 
-          <div class="ap-section-title">
-            <h3>Contributions</h3>
-            <NuxtLink :to="`/user/me/contributions`">Voir tout →</NuxtLink>
-          </div>
-          <ContributionTableMe
-            v-if="contributions?.length"
-            :items="contributions"
-          />
-          <p v-else class="ap-empty ap-muted">
-            Aucune contribution enregistrée.
-          </p>
+          <template v-if="isDeveloper">
+            <div class="ap-grid">
+              <article class="ap-stat">
+                <strong>{{ totalDuration }}</strong
+                ><span>Durée cumulée de mes contributions</span>
+              </article>
+            </div>
 
-          <div class="ap-links">
-            <NuxtLink
-              :to="`/user/me/contributions/save?user=${user.id}`"
-              role="button"
-              class="ap-btn secondary outline"
-              >+ Ajouter une contribution</NuxtLink
-            >
-          </div>
+            <div class="ap-section-title">
+              <h3>Projets</h3>
+              <NuxtLink :to="`/user/me/projects`">Voir tout →</NuxtLink>
+            </div>
+            <ProjectCardsMe v-if="projects?.length" :items="projects" />
+            <p v-else class="ap-empty ap-muted">
+              Aucun projet pour cet utilisateur.
+            </p>
+
+            <div class="ap-section-title">
+              <h3>Contributions</h3>
+              <NuxtLink :to="`/user/me/contributions`">Voir tout →</NuxtLink>
+            </div>
+            <ContributionTableMe
+              v-if="contributions?.length"
+              :items="contributions"
+            />
+            <p v-else class="ap-empty ap-muted">
+              Aucune contribution enregistrée.
+            </p>
+
+            <div class="ap-links">
+              <NuxtLink
+                :to="`/user/me/contributions/save?user=${user.id}`"
+                role="button"
+                class="ap-btn secondary outline"
+                >+ Ajouter une contribution</NuxtLink
+              >
+            </div>
+          </template>
         </template>
       </DataState>
     </AppPage>
@@ -64,6 +78,7 @@
 
 <script setup lang="ts">
   import { fullName, initials, errorMessage, roleTone } from '~/utils/format'
+  import { sumDuration } from '~/utils/projectRules'
 
   const { getUserProfil, getProjectByUserId, getContributionByUserId } =
     useApiUser()
@@ -73,6 +88,10 @@
     user.value?.id ?? 0,
   )
   const message = ref('')
+
+  // Seuls les développeurs ont des projets et des contributions
+  const isDeveloper = computed(() => !!user.value?.roles?.includes('DEVELOPER'))
+  const totalDuration = computed(() => sumDuration(contributions.value ?? []))
 </script>
 
 <style scoped></style>
