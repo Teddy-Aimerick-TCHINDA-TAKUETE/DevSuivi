@@ -68,7 +68,7 @@
   // Préremplissable via /assign/save?user=1&project=2
   const route = useRoute()
   const { saveAssign } = useApiAssign()
-  const { getAllUsers, getProjetByUserId } = useApiUser()
+  const { getAllUsers, getProjectByUserId } = useApiUser()
   const { data: users } = await getAllUsers()
   // Seuls les développeurs peuvent être affectés à un projet ou saisir du temps
   const developers = computed(() =>
@@ -94,7 +94,7 @@
       }
       loadingProjects.value = true
       try {
-        const { data: assigned } = await getProjetByUserId(userId)
+        const { data: assigned } = await getProjectByUserId(userId)
         const ids = new Set(assigned.value?.map((p) => p.id))
         availableProjects.value = (projects.value ?? []).filter(
           (p) => !ids.has(p.id) && canBeAssigned(p.status),

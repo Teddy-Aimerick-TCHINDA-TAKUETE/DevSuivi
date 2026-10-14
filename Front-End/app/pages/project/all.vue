@@ -3,10 +3,10 @@
     <AppPage
       title="Tous les projets"
       subtitle="Recherchez, modifiez ou supprimez vos projets."
-      back="/projet"
+      back="/project"
     >
       <template #actions>
-        <NuxtLink to="/projet/save" role="button" class="ap-btn"
+        <NuxtLink to="/project/save" role="button" class="ap-btn"
           >+ Nouveau projet</NuxtLink
         >
       </template>
@@ -38,7 +38,7 @@
             <tbody>
               <tr v-for="p in filtered" :key="p.id">
                 <td>
-                  <NuxtLink :to="`/projet/${p.id}`"
+                  <NuxtLink :to="`/project/${p.id}`"
                     ><strong>{{ p.name }}</strong></NuxtLink
                   >
                 </td>
@@ -50,14 +50,14 @@
                 </td>
                 <td>{{ p.quota }}</td>
                 <td>
-                  <NuxtLink v-if="p.server" :to="`/serveur/${p.server.id}`">{{
+                  <NuxtLink v-if="p.server" :to="`/server/${p.server.id}`">{{
                     p.server.name
                   }}</NuxtLink>
                   <span v-else class="ap-muted">—</span>
                 </td>
                 <td class="ap-cell-actions">
                   <NuxtLink
-                    :to="`/projet/save?id=${p.id}`"
+                    :to="`/project/save?id=${p.id}`"
                     role="button"
                     class="ap-btn ap-sm outline"
                     >Modifier</NuxtLink

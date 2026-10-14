@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetailDto getUserById(Long id){
         var user = getEntityUserById(id);
-        List<ProjectListDto> projects = getListProjet(user.getId());
+        List<ProjectListDto> projects = getListProject(user.getId());
         List<ContributionListDto> contributionListDtos = user.getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
                 .toList();
@@ -60,8 +60,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectListDto> getProjetsByUserId(Long id){
-        return getListProjet(id);
+    public List<ProjectListDto> getProjectsByUserId(Long id){
+        return getListProject(id);
     }
 
     @Transactional(readOnly = true)
@@ -107,7 +107,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    List<ProjectListDto> getListProjet(Long id){
+    List<ProjectListDto> getListProject(Long id){
         return getEntityUserById(id).getAssigns().stream()
                 .map(Assign::getProject)
                 .map(projectMapper::toProjectListDto)
@@ -124,7 +124,7 @@ public class UserService implements UserDetailsService {
         var user = userMapper.toUser(userNewDto);
         user.setPassword(passwordEncoder.encode(userNewDto.password()));
         var saved = userRepository.save(user);
-        List<ProjectListDto> projects = getListProjet(saved.getId());
+        List<ProjectListDto> projects = getListProject(saved.getId());
         List<ContributionListDto> contributionListDtos = saved.getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
                 .toList();
@@ -148,7 +148,7 @@ public class UserService implements UserDetailsService {
         userMapper.updateUser(userNewDto, user);
         user.setPassword(passwordEncoder.encode(userNewDto.password()));
         var saved = userRepository.save(user);
-        List<ProjectListDto> projects = getListProjet(saved.getId());
+        List<ProjectListDto> projects = getListProject(saved.getId());
         List<ContributionListDto> contributionListDtos = saved.getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
                 .toList();

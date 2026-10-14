@@ -3,10 +3,10 @@
     <AppPage
       title="Tous les serveurs"
       subtitle="Gérez votre parc de serveurs."
-      back="/serveur"
+      back="/server"
     >
       <template #actions>
-        <NuxtLink to="/serveur/save" role="button" class="ap-btn"
+        <NuxtLink to="/server/save" role="button" class="ap-btn"
           >+ Nouveau serveur</NuxtLink
         >
       </template>
@@ -36,20 +36,20 @@
             <tbody>
               <tr v-for="s in filtered" :key="s.id">
                 <td>
-                  <NuxtLink :to="`/serveur/${s.id}`"
+                  <NuxtLink :to="`/server/${s.id}`"
                     ><strong>{{ s.name }}</strong></NuxtLink
                   >
                 </td>
                 <td class="ap-muted">{{ s.description }}</td>
                 <td class="ap-cell-actions">
                   <NuxtLink
-                    :to="`/serveur/projets?id=${s.id}`"
+                    :to="`/server/projects?id=${s.id}`"
                     role="button"
                     class="ap-btn ap-sm secondary outline"
                     >Projets</NuxtLink
                   >
                   <NuxtLink
-                    :to="`/serveur/save?id=${s.id}`"
+                    :to="`/server/save?id=${s.id}`"
                     role="button"
                     class="ap-btn ap-sm outline"
                     >Modifier</NuxtLink

@@ -73,7 +73,7 @@
 
   // /contribution/save → création (préremplissable via ?user= et ?project=)
   // /contribution/save?id=5 → modification
-  const { getContributionByUserId, getUserProfil, getProjetByUserId } =
+  const { getContributionByUserId, getUserProfil, getProjectByUserId } =
     useApiUser()
   const { data: user } = await getUserProfil()
   const userId = user.value?.id || 0
@@ -84,7 +84,7 @@
     useApiContribution()
   // const { data: users } = useApiUser().getAllUsers()
   // const { data: projects } = useApiProject().getAllProjects()
-  const { data: projects } = await getProjetByUserId(userId)
+  const { data: projects } = await getProjectByUserId(userId)
   const existing = id ? await getContributionById(id) : null
   // Projet d'origine d'une contribution modifiée : on le garde dans la liste
   // même s'il est clôturé depuis, pour pouvoir corriger la durée ou la date.

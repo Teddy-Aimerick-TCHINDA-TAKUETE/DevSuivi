@@ -4,7 +4,7 @@
       :is="p.id ? NuxtLink : 'div'"
       v-for="(p, i) in items"
       :key="p.id ?? i"
-      :to="p.id ? `/projet/${p.id}` : undefined"
+      :to="p.id ? `/project/${p.id}` : undefined"
       class="ap-card"
     >
       <div class="ap-card-top">

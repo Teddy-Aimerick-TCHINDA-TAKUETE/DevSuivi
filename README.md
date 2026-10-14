@@ -49,7 +49,8 @@ flowchart LR
 ```
 
 - Back-End en couches : `Controller` → `Service` → `Repository`, avec des DTO (records) et des mappers MapStruct.
-- Authentification : `POST /auth/login` renvoie un access token JWT (HS256) et un refresh token. Le front stocke les jetons dans des cookies et les envoie dans l'en-tête `Authorization: Bearer ...`.
+- Authentification : `POST /auth/login` renvoie un access token JWT (HS256) et un refresh token. Le front stocke les jetons dans des cookies et les envoie dans l'en-tête `Authorization: Bearer ...`. `POST /auth/register` crée un compte développeur.
+- Le code (routes, endpoints, noms de fichiers, identifiants) utilise l'anglais `project` ; l'interface reste en français.
 
 ## Modèle de données
 
@@ -104,4 +105,22 @@ erDiagram
 | Responsable | `MANAGER` | Projets, affectations, contributions de tous |
 | Développeur | `DEVELOPER` | Ses projets, ses contributions, son profil |
 
-Un utilisateur peut cumuler plusieurs rôles.
+Combinaisons autorisées : `ADMIN`, `MANAGER`, `ADMIN` + `MANAGER`, ou `DEVELOPER` seul. `DEVELOPER` ne se combine pas avec les rôles de responsable (le compte de test Teddy est une exception volontaire).
+
+## Règles métier
+
+| Règle | Où elle est appliquée |
+|---|---|
+| Seul un `DEVELOPER` peut être affecté à un projet ou déclarer une contribution | API + interface |
+| Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | API + interface |
+| Un développeur n'est affecté qu'à un projet `PLANNED` ou `IN_PROGRESS` | interface uniquement |
+| L'email d'un utilisateur est unique | API |
+| Un utilisateur qui a des affectations ou des contributions doit rester `DEVELOPER` | API |
+
+États d'un projet : `PLANNED`, `IN_PROGRESS`, `PAUSE`, `FINISH` (clôturé), `CANCELED`.
+
+## Reste à faire
+
+- Signaler les projets en dépassement de quota (temps consommé > quota).
+- Tableau de bord du responsable : temps par développeur sur une période, projets en dépassement, projets clôturés récemment.
+- Côté API : vérifier l'état du projet lors d'une affectation, et qu'un développeur ne modifie que ses propres contributions.

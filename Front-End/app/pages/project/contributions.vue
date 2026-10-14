@@ -1,14 +1,24 @@
 <template>
   <div>
     <AppPage
-      title="Membres du projet"
+      title="Contributions du projet"
       :subtitle="
         current
-          ? `Équipe de « ${current.name} »`
-          : 'Choisissez un projet pour voir son équipe.'
+          ? `Temps passé sur « ${current.name} »`
+          : 'Choisissez un projet pour voir ses contributions.'
       "
-      back="/user/me/projets"
+      back="/project"
     >
+      <template #actions>
+        <NuxtLink
+          v-if="id"
+          :to="`/contribution/save?project=${id}`"
+          role="button"
+          class="ap-btn"
+          >+ Contribution</NuxtLink
+        >
+      </template>
+
       <EntityPicker label="Projet" :options="options" :current="id" />
 
       <p v-if="!id" class="ap-empty ap-muted">
@@ -18,10 +28,10 @@
         v-else
         :pending="pending"
         :error="error"
-        :empty="!users.length"
-        empty-text="Aucun membre sur ce projet."
+        :empty="!contributions.length"
+        empty-text="Aucune contribution sur ce projet."
       >
-        <UserCardsMe :items="users" />
+        <ContributionTable :items="contributions" />
       </DataState>
     </AppPage>
   </div>
@@ -31,16 +41,11 @@
   definePageMeta({ key: (route) => route.fullPath })
 
   const id = Number(useRoute().query.id) || 0
-  const { getAllProjects, getUsersByProjectId } = useApiProject()
-  // const { data: projects } = getAllProjects()
-  const result = id ? await getUsersByProjectId(id) : null
+  const { getAllProjects, getContributiosByProjectId } = useApiProject()
+  const { data: projects } = await getAllProjects()
+  const result = id ? await getContributiosByProjectId(id) : null
 
-  const { getProjetByUserId, getUserProfil } = useApiUser()
-  const { data: user } = await getUserProfil()
-  const userId = user.value?.id || 0
-  const { data: projects } = await getProjetByUserId(userId)
-
-  const users = computed(() => result?.data.value ?? [])
+  const contributions = computed(() => result?.data.value ?? [])
   const pending = computed(() => result?.status.value === 'pending')
   const error = computed(() => result?.error.value)
   const options = computed(() =>

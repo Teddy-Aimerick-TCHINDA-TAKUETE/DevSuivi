@@ -32,7 +32,7 @@
             </div>
           </NuxtLink>
 
-          <NuxtLink :to="`/projet/${assign.project.id}`" class="ap-card">
+          <NuxtLink :to="`/project/${assign.project.id}`" class="ap-card">
             <small class="ap-muted">Projet</small>
             <h4 style="margin-top: 0.5rem">{{ assign.project.name }}</h4>
             <p>{{ assign.project.description }}</p>

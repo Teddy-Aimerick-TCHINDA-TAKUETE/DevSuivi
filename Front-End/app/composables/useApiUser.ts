@@ -29,9 +29,9 @@ export function useApiUser() {
       })),
     })
   }
-  async function getProjetByUserId(id: number) {
+  async function getProjectByUserId(id: number) {
     return await useFetch<ProjectListDto[]>(
-      () => `${apiBase}/user/${id}/projets`,
+      () => `${apiBase}/user/${id}/projects`,
       {
         headers: computed(() => ({
           Authorization: `Bearer ${accessToken.value}`,
@@ -79,7 +79,7 @@ export function useApiUser() {
     getAllUsers,
     getUserById,
     getUserProfil,
-    getProjetByUserId,
+    getProjectByUserId,
     getContributionByUserId,
     saveUser,
     updateUser,

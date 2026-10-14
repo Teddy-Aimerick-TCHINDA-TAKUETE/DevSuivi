@@ -53,7 +53,7 @@
 
             <NuxtLink
               v-if="contribution.project"
-              :to="`/projet/${contribution.project.id}`"
+              :to="`/project/${contribution.project.id}`"
               class="ap-card"
             >
               <small class="ap-muted">Projet</small>

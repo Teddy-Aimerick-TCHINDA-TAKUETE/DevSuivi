@@ -3,10 +3,10 @@
     <AppPage
       title="Tous les projets"
       subtitle="Recherchez, modifiez ou supprimez vos projets."
-      back="/user/me/projets"
+      back="/user/me/projects"
     >
       <!-- <template #actions>
-        <NuxtLink to="/projet/save" role="button" class="ap-btn"
+        <NuxtLink to="/project/save" role="button" class="ap-btn"
           >+ Nouveau projet</NuxtLink
         >
       </template> -->
@@ -38,7 +38,7 @@
             <tbody>
               <tr v-for="p in filtered" :key="p.id">
                 <td>
-                  <NuxtLink :to="`/user/me/projets/${p.id}`"
+                  <NuxtLink :to="`/user/me/projects/${p.id}`"
                     ><strong>{{ p.name }}</strong></NuxtLink
                   >
                 </td>
@@ -49,7 +49,7 @@
                 </td>
                 <td>{{ p.quota }}</td>
                 <td>
-                  <!-- <NuxtLink v-if="p.server" :to="`/serveur/${p.server.id}`">{{
+                  <!-- <NuxtLink v-if="p.server" :to="`/server/${p.server.id}`">{{
                     p.server.name
                   }}</NuxtLink> -->
                   <div v-if="p.server">{{ p.server.name }}</div>
@@ -57,7 +57,7 @@
                 </td>
                 <!-- <td class="ap-cell-actions">
                   <NuxtLink
-                    :to="`/projet/save?id=${p.id}`"
+                    :to="`/project/save?id=${p.id}`"
                     role="button"
                     class="ap-btn ap-sm outline"
                     >Modifier</NuxtLink
@@ -84,7 +84,7 @@
   // const { getAllProjects, deleteProject } = useApiProject()
   // const { data: projects, status, error, refresh } = getAllProjects()
 
-  const { getProjetByUserId, getUserProfil } = useApiUser()
+  const { getProjectByUserId, getUserProfil } = useApiUser()
   const { data: user } = await getUserProfil()
   const userId = user.value?.id || 0
   const {
@@ -92,7 +92,7 @@
     status,
     error,
     refresh,
-  } = await getProjetByUserId(userId)
+  } = await getProjectByUserId(userId)
 
   const search = ref('')
   const message = ref('')

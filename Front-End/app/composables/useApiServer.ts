@@ -20,7 +20,7 @@ export function useApiServer() {
       })),
     })
   }
-  async function getProjetsByServerId(id: number) {
+  async function getProjectsByServerId(id: number) {
     return await useFetch<ProjectListDto[]>(
       () => `${apiBase}/server/${id}/projects`,
       {
@@ -59,7 +59,7 @@ export function useApiServer() {
   return {
     getAllServers,
     getServerById,
-    getProjetsByServerId,
+    getProjectsByServerId,
     saveServer,
     updateServer,
     deleteServer,

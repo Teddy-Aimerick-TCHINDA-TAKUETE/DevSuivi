@@ -95,7 +95,7 @@
   const id = Number(route.query.id) || null
   const { getContributionById, saveContribution, updateContribution } =
     useApiContribution()
-  const { getAllUsers, getProjetByUserId } = useApiUser()
+  const { getAllUsers, getProjectByUserId } = useApiUser()
   const { data: users } = await getAllUsers()
   // Seuls les développeurs peuvent être affectés à un projet ou saisir du temps
   const developers = computed(() =>
@@ -153,7 +153,7 @@
       }
       loadingProjects.value = true
       try {
-        const { data } = await getProjetByUserId(userId)
+        const { data } = await getProjectByUserId(userId)
         projects.value = data.value ?? []
       } catch {
         projects.value = []

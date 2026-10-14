@@ -14,7 +14,7 @@ async function isOwnUserPage(to: { path: string; query: Record<string, any> }) {
   const myId = user.id
   if (!myId) return false
   if (to.path === `/user/me`) return true
-  if (['/user/me/projets', '/user/me/contributions'].includes(to.path)) {
+  if (['/user/me/projects', '/user/me/contributions'].includes(to.path)) {
     return true
   }
   // if (['/user/projects', '/user/contributions'].includes(to.path)) {
@@ -24,24 +24,24 @@ async function isOwnUserPage(to: { path: string; query: Record<string, any> }) {
 }
 
 // Un non-admin voit la liste des projets, et seulement ceux auxquels il est affecté
-async function isOwnProjetPage(to: {
+async function isOwnProjectPage(to: {
   path: string
   query: Record<string, any>
 }) {
   if (
     [
-      '/user/me/projets',
-      '/user/me/projets/all',
-      '/user/me/projets/contributions',
-      '/user/me/projets/users',
+      '/user/me/projects',
+      '/user/me/projects/all',
+      '/user/me/projects/contributions',
+      '/user/me/projects/users',
     ].includes(to.path)
   )
     return true
 
   let projectId = 0
-  const detail = to.path.match(/^\/user\/me\/projets\/(\d+)$/)
+  const detail = to.path.match(/^\/user\/me\/projects\/(\d+)$/)
   if (detail) projectId = Number(detail[1])
-  // else if (['/projet/users', '/projet/contributions'].includes(to.path)) {
+  // else if (['/project/users', '/project/contributions'].includes(to.path)) {
   //   projectId = Number(to.query.id)
   // }
   if (!projectId) return false
@@ -127,14 +127,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     inSection(to.path, '/user') &&
     !hasRole('ADMIN') &&
     !(await isOwnUserPage(to)) &&
-    !(await isOwnProjetPage(to)) &&
+    !(await isOwnProjectPage(to)) &&
     !(await isOwnCotributionPage(to))
   )
     throw forbidden()
-  if (inSection(to.path, '/serveur') && !hasRole('ADMIN')) throw forbidden()
+  if (inSection(to.path, '/server') && !hasRole('ADMIN')) throw forbidden()
   if (inSection(to.path, '/assign') && !hasRole('ADMIN', 'MANAGER'))
     throw forbidden()
-  if (inSection(to.path, '/projet') && !hasRole('ADMIN', 'MANAGER'))
+  if (inSection(to.path, '/project') && !hasRole('ADMIN', 'MANAGER'))
     throw forbidden()
   if (inSection(to.path, '/contribution') && !hasRole('ADMIN', 'MANAGER'))
     throw forbidden()

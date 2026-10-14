@@ -7,7 +7,7 @@
           ? `Hébergés sur « ${current.name} »`
           : 'Choisissez un serveur pour voir ses projets.'
       "
-      back="/serveur"
+      back="/server"
     >
       <EntityPicker label="Serveur" :options="options" :current="id" />
 
@@ -31,9 +31,9 @@
   definePageMeta({ key: (route) => route.fullPath })
 
   const id = Number(useRoute().query.id) || 0
-  const { getAllServers, getProjetsByServerId } = useApiServer()
+  const { getAllServers, getProjectsByServerId } = useApiServer()
   const { data: servers } = await getAllServers()
-  const result = id ? await getProjetsByServerId(id) : null
+  const result = id ? await getProjectsByServerId(id) : null
 
   const projects = computed(() => result?.data.value ?? [])
   const pending = computed(() => result?.status.value === 'pending')

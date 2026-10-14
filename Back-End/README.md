@@ -49,7 +49,8 @@ psql -U postgres -d dev_suivi -f src/main/resources/data/init-dev-suivi.sql
 | alice.martin@company.com | alice_martin | ADMIN, MANAGER |
 | thomas.dubois@company.com | thomas_dubois | MANAGER |
 | lucas.moreau@company.com | lucas_moreau | DEVELOPER |
-| teddy.teddy@company.com | teddy_teddy | ADMIN, MANAGER, DEVELOPER |
+| sophie.bernard@company.com | sophie_bernard | DEVELOPER |
+| teddy.teddy@company.com | teddy_teddy | ADMIN, MANAGER, DEVELOPER (exception de test) |
 
 Les autres comptes suivent le format `prenom.nom@company.com` / `prenom_nom`.
 
@@ -81,6 +82,7 @@ src/main/java/devSuivi/
 ## Authentification
 
 - `POST /auth/login` avec `{ "email", "password" }` renvoie `{ accessToken, refreshToken, accessExpireAt, refreshExpireAt }`.
+- `POST /auth/register` avec `{ firstName, lastName, email, password }` crée un compte. Le rôle est toujours forcé à `DEVELOPER`, quels que soient les rôles envoyés.
 - `POST /auth/refresh` avec `{ "refreshToken" }` renvoie une nouvelle paire de jetons.
 - L'access token est un JWT HS256 : `sub` = email, claim `roles` = `["ADMIN", ...]`.
 - Les refresh tokens sont gardés en mémoire : ils sont perdus au redémarrage de l'API.
@@ -89,7 +91,7 @@ src/main/java/devSuivi/
 
 | Méthode | Route | Accès |
 |---|---|---|
-| POST | `/auth/login`, `/auth/refresh` | public |
+| POST | `/auth/login`, `/auth/register`, `/auth/refresh` | public |
 | GET | `/user/me` | authentifié |
 | GET | `/user/{id}/projects`, `/user/{id}/contributions` | authentifié |
 | GET | `/user` | ADMIN, MANAGER |
@@ -105,14 +107,27 @@ src/main/java/devSuivi/
 ## Données métier
 
 - `Project.quota` : quota en heures. `Contribution.duration` : durée en minutes.
-- `Project.status` : `IN_PROGRESS`, `COMPLETED`, `PLANNED` dans le jeu de test.
+- `Project.status` : `PLANNED`, `IN_PROGRESS`, `PAUSE`, `FINISH` (clôturé), `CANCELED`. Le jeu de test utilise `PLANNED`, `IN_PROGRESS` et `FINISH`.
 - Supprimer un projet ou un utilisateur supprime en cascade ses affectations et ses contributions. Supprimer un serveur supprime aussi ses projets.
+
+### Règles vérifiées par l'API
+
+| Règle | Service | Erreur |
+|---|---|---|
+| L'email est unique (sans tenir compte de la casse) | `UserService` | 409 |
+| Rôles connus uniquement (`ADMIN`, `MANAGER`, `DEVELOPER`) ; `DEVELOPER` ne se combine pas avec `ADMIN` ou `MANAGER` | `UserService` | 400 |
+| Un utilisateur qui a des affectations ou des contributions ne peut pas perdre le rôle `DEVELOPER` | `UserService` | 409 |
+| Seul un `DEVELOPER` peut être affecté à un projet | `AssignService` | 400 |
+| Seul un `DEVELOPER` peut déclarer une contribution | `ContributionService` | 400 |
+| Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | `ContributionService` | 409 |
+
+Modifier la durée ou la date d'une contribution existante reste possible même si le projet a été clôturé depuis. Changer son utilisateur ou son projet repasse par les contrôles ci-dessus.
 
 ## Limites actuelles
 
-Ces règles du sujet ne sont pas encore appliquées côté API :
+Pas encore géré côté API :
 
-- refuser une contribution sur un projet clôturé ou sur un projet auquel le développeur n'est pas affecté ;
-- vérifier qu'un développeur ne modifie que ses propres contributions ;
+- vérifier l'état du projet lors d'une affectation (`PLANNED` ou `IN_PROGRESS`) : seule l'interface le contrôle pour l'instant ;
+- vérifier qu'un développeur ne modifie ou ne supprime que ses propres contributions ;
 - calculer le temps consommé et l'indicateur de dépassement de quota ;
 - fournir les données du tableau de bord (temps par développeur sur une période, projets en dépassement, projets clôturés récemment).

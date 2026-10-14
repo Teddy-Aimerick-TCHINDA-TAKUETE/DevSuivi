@@ -3,21 +3,13 @@
     <AppPage
       :title="project?.name ?? 'Projet'"
       :subtitle="project?.description"
-      back="/user/me/projets/all"
+      back="/project/all"
     >
-      <!-- <template #actions>
-        <NuxtLink :to="`/projet/save?id=${id}`" role="button" class="ap-btn"
+      <template #actions>
+        <NuxtLink :to="`/project/save?id=${id}`" role="button" class="ap-btn"
           >Modifier</NuxtLink
         >
         <button class="ap-btn danger" @click="remove">Supprimer</button>
-      </template> -->
-      <template #actions>
-        <NuxtLink
-          :to="`/user/me/contributions/save?project=${id}`"
-          role="button"
-          class="ap-btn"
-          >+ Ajouter une contribution</NuxtLink
-        >
       </template>
 
       <article v-if="message" class="ap-error">{{ message }}</article>
@@ -50,36 +42,41 @@
           </div>
 
           <label>
+            Changer l’état du projet
+            <ProjectStatusSelect
+              :project="project"
+              @changed="project.status = $event"
+            />
+          </label>
+
+          <label>
             Durée cumulée / quota
             <progress :value="usedTime" :max="project.quota || 1" />
           </label>
 
           <p v-if="project.server">
             Hébergé sur
-            <!-- <NuxtLink :to="`/serveur/${project.server.id}`"
+            <NuxtLink :to="`/server/${project.server.id}`"
               ><strong>{{ project.server.name }}</strong></NuxtLink
-            > -->
-            <strong>{{ project.server.name }}</strong>
+            >
           </p>
 
           <div class="ap-section-title">
             <h3>Équipe</h3>
-            <NuxtLink :to="`/user/me/projets/users?id=${id}`"
-              >Voir tout →</NuxtLink
-            >
+            <NuxtLink :to="`/project/users?id=${id}`">Voir tout →</NuxtLink>
           </div>
-          <UserCardsMe v-if="project.users?.length" :items="project.users" />
+          <UserCards v-if="project.users?.length" :items="project.users" />
           <p v-else class="ap-empty ap-muted">
             Personne n’est encore affecté à ce projet.
           </p>
 
           <div class="ap-section-title">
             <h3>Contributions</h3>
-            <NuxtLink :to="`/user/me/projets/contributions?id=${id}`"
+            <NuxtLink :to="`/project/contributions?id=${id}`"
               >Voir tout →</NuxtLink
             >
           </div>
-          <ContributionTableMe
+          <ContributionTable
             v-if="project.contributions?.length"
             :items="project.contributions"
           />
@@ -88,14 +85,14 @@
           </p>
 
           <div class="ap-links">
-            <!-- <NuxtLink
+            <NuxtLink
               :to="`/assign/save?project=${id}`"
               role="button"
               class="ap-btn secondary outline"
               >+ Affecter un utilisateur</NuxtLink
-            > -->
+            >
             <NuxtLink
-              :to="`/user/me/contributions/save?project=${id}`"
+              :to="`/contribution/save?project=${id}`"
               role="button"
               class="ap-btn secondary outline"
               >+ Ajouter une contribution</NuxtLink
@@ -136,7 +133,7 @@
       message.value = errorMessage(err.value)
       return
     }
-    await navigateTo('/projet/all')
+    await navigateTo('/project/all')
   }
 </script>
 

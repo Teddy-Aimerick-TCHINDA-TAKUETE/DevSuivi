@@ -2,16 +2,13 @@
   <div>
     <AppPage title="Projets" subtitle="Vue d’ensemble de vos projets.">
       <template #actions>
-        <NuxtLink to="/projet/users" role="button" class="ap-btn"
-          >Users par projet</NuxtLink
-        >
-        <NuxtLink to="/projet/contributions" role="button" class="ap-btn"
-          >Contributions par projet</NuxtLink
-        >
-        <NuxtLink to="/projet/save" role="button" class="ap-btn"
+        <!-- <NuxtLink to="/project/save" role="button" class="ap-btn"
           >+ Nouveau projet</NuxtLink
-        >
-        <NuxtLink to="/projet/all" role="button" class="ap-btn ap-ghost"
+        > -->
+        <NuxtLink
+          to="/user/me/projects/all"
+          role="button"
+          class="ap-btn ap-ghost"
           >Tout voir</NuxtLink
         >
       </template>
@@ -39,20 +36,27 @@
 
         <div class="ap-section-title">
           <h3>Derniers projets</h3>
-          <NuxtLink to="/projet/all">Voir la liste complète →</NuxtLink>
+          <NuxtLink to="/user/me/projects/all"
+            >Voir la liste complète →</NuxtLink
+          >
         </div>
-        <ProjectCards :items="recent" />
+        <ProjectCardsMe :items="recent" />
       </DataState>
     </AppPage>
   </div>
 </template>
 
 <script setup lang="ts">
-  const {
-    data: projects,
-    status,
-    error,
-  } = await useApiProject().getAllProjects()
+  //const { data: projects, status, error } = useApiProject().getAllProjects()
+
+  const { getProjectByUserId, getUserProfil } = useApiUser()
+  const { data: user } = await getUserProfil()
+  const userId = user.value?.id || 0
+  const { data: projects, status, error } = await getProjectByUserId(userId)
+
+  // const projects = computed(() => result?.data.value ?? [])
+  // const status = computed(() => result?.status.value === 'pending')
+  // const error = computed(() => result?.error.value)
 
   const recent = computed(() =>
     [...(projects.value ?? [])].sort((a, b) => b.id - a.id).slice(0, 6),

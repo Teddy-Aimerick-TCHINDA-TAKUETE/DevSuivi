@@ -42,7 +42,7 @@
                   </NuxtLink>
                 </td>
                 <td>
-                  <NuxtLink :to="`/projet/${a.project.id}`">{{
+                  <NuxtLink :to="`/project/${a.project.id}`">{{
                     a.project.name
                   }}</NuxtLink>
                 </td>

@@ -3,7 +3,7 @@
     <AppPage
       :title="id ? 'Modifier le projet' : 'Nouveau projet'"
       subtitle="Renseignez les informations principales du projet."
-      back="/projet/all"
+      back="/project/all"
     >
       <article>
         <form @submit.prevent="submit">
@@ -78,7 +78,7 @@
 
   definePageMeta({ key: (route) => route.fullPath })
 
-  // /projet/save → création · /projet/save?id=3 → modification
+  // /project/save → création · /project/save?id=3 → modification
   const id = Number(useRoute().query.id) || null
   const { getProjectById, saveProject, updateProject } = useApiProject()
   const { data: servers } = await useApiServer().getAllServers()
@@ -132,7 +132,7 @@
       return
     }
     await navigateTo(
-      res.data.value?.id ? `/projet/${res.data.value.id}` : '/projet/all',
+      res.data.value?.id ? `/project/${res.data.value.id}` : '/project/all',
     )
   }
 </script>

@@ -46,8 +46,8 @@
 
   const links = computed(
     () => [
-      // { to: '/projet', label: 'Projets', show: true },
-      // { to: '/serveur', label: 'Serveurs', show: hasRole('ADMIN') },
+      // { to: '/project', label: 'Projets', show: true },
+      // { to: '/server', label: 'Serveurs', show: hasRole('ADMIN') },
       // { to: '/user', label: 'Utilisateurs', show: hasRole('ADMIN') },
       // {
       //   to: '/contribution',

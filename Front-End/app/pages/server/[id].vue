@@ -3,10 +3,10 @@
     <AppPage
       :title="server?.name ?? 'Serveur'"
       :subtitle="server?.description"
-      back="/serveur/all"
+      back="/server/all"
     >
       <template #actions>
-        <NuxtLink :to="`/serveur/save?id=${id}`" role="button" class="ap-btn"
+        <NuxtLink :to="`/server/save?id=${id}`" role="button" class="ap-btn"
           >Modifier</NuxtLink
         >
         <button class="ap-btn danger" @click="remove">Supprimer</button>
@@ -24,7 +24,7 @@
 
         <div class="ap-section-title">
           <h3>Projets hébergés</h3>
-          <NuxtLink :to="`/serveur/projects?id=${id}`">Voir à part →</NuxtLink>
+          <NuxtLink :to="`/server/projects?id=${id}`">Voir à part →</NuxtLink>
         </div>
         <ProjectCards v-if="projects?.length" :items="projects" />
         <p v-else class="ap-empty ap-muted">Aucun projet sur ce serveur.</p>
@@ -37,9 +37,9 @@
   import { errorMessage } from '~/utils/format'
 
   const id = Number(useRoute().params.id)
-  const { getServerById, getProjetsByServerId, deleteServer } = useApiServer()
+  const { getServerById, getProjectsByServerId, deleteServer } = useApiServer()
   const { data: server, status, error } = await getServerById(id)
-  const { data: projects } = await getProjetsByServerId(id)
+  const { data: projects } = await getProjectsByServerId(id)
   const message = ref('')
 
   async function remove() {
@@ -56,7 +56,7 @@
       message.value = errorMessage(err.value)
       return
     }
-    await navigateTo('/serveur/all')
+    await navigateTo('/server/all')
   }
 </script>
 

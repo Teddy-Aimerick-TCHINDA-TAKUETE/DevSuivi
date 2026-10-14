@@ -5,10 +5,10 @@
       subtitle="Les machines qui hébergent vos projets."
     >
       <template #actions>
-        <NuxtLink to="/serveur/save" role="button" class="ap-btn"
+        <NuxtLink to="/server/save" role="button" class="ap-btn"
           >+ Nouveau serveur</NuxtLink
         >
-        <NuxtLink to="/serveur/all" role="button" class="ap-btn ap-ghost"
+        <NuxtLink to="/server/all" role="button" class="ap-btn ap-ghost"
           >Tout voir</NuxtLink
         >
       </template>
@@ -29,7 +29,7 @@
           <NuxtLink
             v-for="s in servers"
             :key="s.id"
-            :to="`/serveur/${s.id}`"
+            :to="`/server/${s.id}`"
             class="ap-card"
           >
             <div class="ap-card-top"><span class="ap-icon">🖥️</span></div>

@@ -3,7 +3,7 @@
     <AppPage
       :title="id ? 'Modifier le serveur' : 'Nouveau serveur'"
       subtitle="Nom et description du serveur."
-      back="/serveur/all"
+      back="/server/all"
     >
       <article class="ap-narrow">
         <form @submit.prevent="submit">
@@ -41,7 +41,7 @@
 
   definePageMeta({ key: (route) => route.fullPath })
 
-  // /serveur/save → création · /serveur/save?id=2 → modification
+  // /server/save → création · /server/save?id=2 → modification
   const id = Number(useRoute().query.id) || null
   const { getServerById, saveServer, updateServer } = useApiServer()
   const existing = id ? await getServerById(id) : null
@@ -75,7 +75,7 @@
       return
     }
     await navigateTo(
-      res.data.value?.id ? `/serveur/${res.data.value.id}` : '/serveur/all',
+      res.data.value?.id ? `/server/${res.data.value.id}` : '/server/all',
     )
   }
 </script>

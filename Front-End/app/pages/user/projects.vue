@@ -33,9 +33,9 @@
   definePageMeta({ key: (route) => route.fullPath })
 
   const id = Number(useRoute().query.id) || 0
-  const { getAllUsers, getProjetByUserId } = useApiUser()
+  const { getAllUsers, getProjectByUserId } = useApiUser()
   const { data: users } = await getAllUsers()
-  const result = id ? await getProjetByUserId(id) : null
+  const result = id ? await getProjectByUserId(id) : null
 
   const projects = computed(() => result?.data.value ?? [])
   const pending = computed(() => result?.status.value === 'pending')

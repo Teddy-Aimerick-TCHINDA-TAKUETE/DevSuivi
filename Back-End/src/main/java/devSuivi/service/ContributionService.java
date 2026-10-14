@@ -95,7 +95,7 @@ public class ContributionService {
         // Qui et sur quel projet, avant que le mapper ne touche à la contribution
         boolean memeUser = contribution.getUser() != null
                 && contribution.getUser().getId().equals(contributionNewDto.idUser());
-        boolean memeProjet = contribution.getProject() != null
+        boolean memeProject = contribution.getProject() != null
                 && contribution.getProject().getId().equals(contributionNewDto.idProject());
         contributionMapper.update(contributionNewDto, contribution);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
@@ -103,7 +103,7 @@ public class ContributionService {
         var project = projectService.getEntityProjectById(contributionNewDto.idProject());
         // Corriger la durée ou la date d'une contribution existante reste possible même
         // si le projet est clôturé depuis ; changer d'utilisateur ou de projet est contrôlé.
-        if (!(memeUser && memeProjet)) {
+        if (!(memeUser && memeProject)) {
             verifierContributionAutorisee(user, project);
         }
         contribution.setUser(user);

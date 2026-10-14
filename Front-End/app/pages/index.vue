@@ -5,7 +5,7 @@
       subtitle="Projets, serveurs, équipes et contributions au même endroit."
     >
       <template v-if="hasRole('ADMIN', 'MANAGER')" #actions>
-        <NuxtLink to="/projet/save" role="button" class="ap-btn"
+        <NuxtLink to="/project/save" role="button" class="ap-btn"
           >+ Nouveau projet</NuxtLink
         >
         <NuxtLink to="/contribution/save" role="button" class="ap-btn ap-ghost"
@@ -51,7 +51,7 @@
   const { data: user } = await useApiUser().getUserProfil()
   const userId = user.value?.id || 0
 
-  const { data: mesProjects } = await useApiUser().getProjetByUserId(userId)
+  const { data: mesProjects } = await useApiUser().getProjectByUserId(userId)
   const { data: mesContributions } =
     await useApiUser().getContributionByUserId(userId)
   const { data: projects } = await useApiProject().getAllProjects()
@@ -66,7 +66,7 @@
   const sections = computed(() =>
     [
       {
-        to: '/user/me/projets',
+        to: '/user/me/projects',
         icon: '📁',
         label: 'Mes projets',
         text: 'Suivre l’avancement, les quotas et les équipes.',
@@ -82,7 +82,7 @@
         show: hasRole('DEVELOPER'),
       },
       {
-        to: '/projet',
+        to: '/project',
         icon: '📁',
         label: 'Projets',
         text: 'Suivre l’avancement, les quotas et les équipes.',
@@ -90,7 +90,7 @@
         show: hasRole('ADMIN', 'MANAGER'),
       },
       {
-        to: '/serveur',
+        to: '/server',
         icon: '🖥️',
         label: 'Serveurs',
         text: 'Les machines qui hébergent vos projets.',

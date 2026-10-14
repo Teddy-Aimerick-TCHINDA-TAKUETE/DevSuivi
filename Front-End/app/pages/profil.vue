@@ -44,7 +44,7 @@
             >Ma fiche</NuxtLink
           >
           <NuxtLink
-            :to="`/user/me/projets`"
+            :to="`/user/me/projects`"
             role="button"
             class="ap-btn secondary outline"
             >Mes projets</NuxtLink

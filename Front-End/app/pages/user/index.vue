@@ -5,7 +5,7 @@
       subtitle="Les membres de l’équipe et leurs rôles."
     >
       <template #actions>
-        <NuxtLink to="/user/projets" role="button" class="ap-btn"
+        <NuxtLink to="/user/projects" role="button" class="ap-btn"
           >Projets par user</NuxtLink
         >
         <NuxtLink to="/user/contributions" role="button" class="ap-btn"

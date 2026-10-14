@@ -7,7 +7,7 @@
           ? `Équipe de « ${current.name} »`
           : 'Choisissez un projet pour voir son équipe.'
       "
-      back="/projet"
+      back="/project"
     >
       <EntityPicker label="Projet" :options="options" :current="id" />
 

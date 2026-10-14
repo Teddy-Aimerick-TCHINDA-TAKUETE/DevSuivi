@@ -29,7 +29,7 @@
 
           <div class="ap-section-title">
             <h3>Projets</h3>
-            <NuxtLink :to="`/user/me/projets`">Voir tout →</NuxtLink>
+            <NuxtLink :to="`/user/me/projects`">Voir tout →</NuxtLink>
           </div>
           <ProjectCardsMe v-if="projects?.length" :items="projects" />
           <p v-else class="ap-empty ap-muted">
@@ -65,10 +65,10 @@
 <script setup lang="ts">
   import { fullName, initials, errorMessage, roleTone } from '~/utils/format'
 
-  const { getUserProfil, getProjetByUserId, getContributionByUserId } =
+  const { getUserProfil, getProjectByUserId, getContributionByUserId } =
     useApiUser()
   const { data: user, status, error } = await getUserProfil()
-  const { data: projects } = await getProjetByUserId(user.value?.id ?? 0)
+  const { data: projects } = await getProjectByUserId(user.value?.id ?? 0)
   const { data: contributions } = await getContributionByUserId(
     user.value?.id ?? 0,
   )
