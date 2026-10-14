@@ -31,12 +31,22 @@
                     : 'Sélectionnez d’abord un utilisateur'
                 }}
               </option>
-              <option v-for="p in projects" :key="p.id" :value="p.id">
-                {{ p.name }}
+              <option v-for="p in selectableProjects" :key="p.id" :value="p.id">
+                {{ p.name
+                }}{{
+                  canReceiveContributions(p.status) ? '' : ` (${p.status})`
+                }}
               </option>
             </select>
-            <small v-if="form.idUser && !loadingProjects && !projects.length"
-              >Cet utilisateur n’est affecté à aucun projet.</small
+            <small
+              v-if="
+                form.idUser && !loadingProjects && !selectableProjects.length
+              "
+              >{{
+                projects.length
+                  ? 'Aucun projet en cours pour cet utilisateur.'
+                  : 'Cet utilisateur n’est affecté à aucun projet.'
+              }}</small
             >
           </label>
           <div class="ap-form-grid">
@@ -75,6 +85,7 @@
 <script setup lang="ts">
   import type { ProjectListDto } from '~/types/projectTypes'
   import { fullName, errorMessage } from '~/utils/format'
+  import { canReceiveContributions } from '~/utils/projectRules'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -106,6 +117,17 @@
   // Nom du projet de la contribution en cours de modification (le détail
   // ne renvoie pas l'id du projet : on le retrouve grâce à son nom)
   let wantedProjectName: string | null = null
+  // Projet d'origine d'une contribution modifiée : on le garde dans la liste
+  // même s'il est clôturé depuis, pour pouvoir corriger la durée ou la date.
+  const originalProjectId = ref(0)
+
+  // Règle : seulement les projets en cours auxquels l'utilisateur est affecté
+  const selectableProjects = computed(() =>
+    projects.value.filter(
+      (p) =>
+        canReceiveContributions(p.status) || p.id === originalProjectId.value,
+    ),
+  )
 
   if (existing) {
     watch(
@@ -142,8 +164,11 @@
         ? projects.value.find((p) => p.name === wantedProjectName)?.id
         : undefined
       wantedProjectName = null
+      if (byName) originalProjectId.value = byName
       const keep = byName ?? form.idProject
-      form.idProject = projects.value.some((p) => p.id === keep) ? keep : 0
+      form.idProject = selectableProjects.value.some((p) => p.id === keep)
+        ? keep
+        : 0
     },
     { immediate: true },
   )

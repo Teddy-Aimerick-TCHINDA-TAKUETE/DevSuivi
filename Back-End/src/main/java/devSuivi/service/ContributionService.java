@@ -3,14 +3,20 @@ package devSuivi.service;
 import devSuivi.dto.ContributionDetailDto;
 import devSuivi.dto.ContributionListDto;
 import devSuivi.dto.ContributionNewDto;
+import devSuivi.entity.AssignId;
 import devSuivi.entity.Contribution;
+import devSuivi.entity.Project;
+import devSuivi.entity.User;
 import devSuivi.mapper.ContributionMapper;
 import devSuivi.mapper.ProjectMapper;
 import devSuivi.mapper.UserMapper;
+import devSuivi.repository.AssignRepositoty;
 import devSuivi.repository.ContributionRepositoty;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,7 +25,10 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class ContributionService {
 
+    private static final String STATUT_EN_COURS = "IN_PROGRESS";
+
     private final ContributionRepositoty contributionRepositoty;
+    private final AssignRepositoty assignRepositoty;
     private final UserService userService;
     private final ProjectService projectService;
     private final ContributionMapper contributionMapper;
@@ -49,12 +58,29 @@ public class ContributionService {
         }
     }
 
+    private void verifierContributionAutorisee(User user, Project project) {
+        if (project == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un projet est obligatoire.");
+        }
+        if (!STATUT_EN_COURS.equals(project.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Le projet « " + project.getName() + " » est " + project.getStatus()
+                            + " : on ne peut déclarer une contribution que sur un projet " + STATUT_EN_COURS + ".");
+        }
+        if (!assignRepositoty.existsById(new AssignId(user.getId(), project.getId()))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    user.getFirstName() + " " + user.getLastName()
+                            + " n'est pas affecté au projet « " + project.getName() + " ».");
+        }
+    }
+
     @Transactional
     public ContributionDetailDto saveContribution(ContributionNewDto contributionNewDto){
         var contribution = contributionMapper.toContribution(contributionNewDto);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
         userService.verifierDeveloper(user, "déclarer une contribution");
         var project = projectService.getEntityProjectById(contributionNewDto.idProject());
+        verifierContributionAutorisee(user, project);
         contribution.setUser(user);
         contribution.setProject(project);
         var saved = contributionRepositoty.save(contribution);
@@ -66,10 +92,20 @@ public class ContributionService {
     @Transactional
     public ContributionDetailDto updateContribution(Long id, ContributionNewDto contributionNewDto){
         var contribution = getEntityContributionById(id);
+        // Qui et sur quel projet, avant que le mapper ne touche à la contribution
+        boolean memeUser = contribution.getUser() != null
+                && contribution.getUser().getId().equals(contributionNewDto.idUser());
+        boolean memeProjet = contribution.getProject() != null
+                && contribution.getProject().getId().equals(contributionNewDto.idProject());
         contributionMapper.update(contributionNewDto, contribution);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
         userService.verifierDeveloper(user, "déclarer une contribution");
         var project = projectService.getEntityProjectById(contributionNewDto.idProject());
+        // Corriger la durée ou la date d'une contribution existante reste possible même
+        // si le projet est clôturé depuis ; changer d'utilisateur ou de projet est contrôlé.
+        if (!(memeUser && memeProjet)) {
+            verifierContributionAutorisee(user, project);
+        }
         contribution.setUser(user);
         contribution.setProject(project);
         var saved = contributionRepositoty.save(contribution);

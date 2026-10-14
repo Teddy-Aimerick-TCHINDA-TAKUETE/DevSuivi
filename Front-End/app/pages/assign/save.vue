@@ -37,7 +37,8 @@
             </select>
             <small
               v-if="form.user && !loadingProjects && !availableProjects.length"
-              >Cet utilisateur est déjà affecté à tous les projets.</small
+              >Aucun projet disponible : cet utilisateur est déjà affecté à tous
+              les projets prévus ou en cours.</small
             >
           </label>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
@@ -60,6 +61,7 @@
 <script setup lang="ts">
   import type { ProjectListDto } from '~/types/projectTypes'
   import { fullName, errorMessage } from '~/utils/format'
+  import { canBeAssigned } from '~/utils/projectRules'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -95,7 +97,7 @@
         const { data: assigned } = await getProjetByUserId(userId)
         const ids = new Set(assigned.value?.map((p) => p.id))
         availableProjects.value = (projects.value ?? []).filter(
-          (p) => !ids.has(p.id),
+          (p) => !ids.has(p.id) && canBeAssigned(p.status),
         )
       } catch {
         availableProjects.value = []

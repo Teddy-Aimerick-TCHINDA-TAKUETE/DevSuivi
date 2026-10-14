@@ -50,22 +50,6 @@ public class AssignService {
         return assignMapper.toAssignListDto(userListDto, projectListDto);
     }
 
-//    @Transactional(readOnly = true)
-//    public List<ProjectListDto> getAllProjectsByUserId(Long id){
-//        return assignRepositoty.findAllByUser(userService.getEntityUserById(id)).stream()
-//                .map(Assign::getProject)
-//                .map(projectMapper::toProjectListDto)
-//                .toList();
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public List<UserListDto> getAllUsersByProjectId(Long id){
-//        return assignRepositoty.findAllByProject(projectService.getEntityProjectById(id)).stream()
-//                .map(Assign::getUser)
-//                .map(userMapper::toUserListDto)
-//                .toList();
-//    }
-
     Assign getEntityAssingById(AssignId assignId){
         if(assignId == null){
             return null;

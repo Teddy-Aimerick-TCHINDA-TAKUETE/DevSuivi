@@ -20,10 +20,17 @@
             Projet
             <select v-model.number="form.idProject" required>
               <option :value="0" disabled>Choisir un projet…</option>
-              <option v-for="p in projects" :key="p.id" :value="p.id">
-                {{ p.name }}
+              <option v-for="p in selectableProjects" :key="p.id" :value="p.id">
+                {{ p.name
+                }}{{
+                  canReceiveContributions(p.status) ? '' : ` (${p.status})`
+                }}
               </option>
             </select>
+            <small v-if="!selectableProjects.length"
+              >Vous n’avez aucun projet en cours sur lequel déclarer une
+              contribution.</small
+            >
           </label>
           <div class="ap-form-grid">
             <label>
@@ -60,6 +67,7 @@
 
 <script setup lang="ts">
   import { fullName, errorMessage } from '~/utils/format'
+  import { canReceiveContributions } from '~/utils/projectRules'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -78,6 +86,17 @@
   // const { data: projects } = useApiProject().getAllProjects()
   const { data: projects } = await getProjetByUserId(userId)
   const existing = id ? await getContributionById(id) : null
+  // Projet d'origine d'une contribution modifiée : on le garde dans la liste
+  // même s'il est clôturé depuis, pour pouvoir corriger la durée ou la date.
+  const originalProjectId = ref(0)
+
+  // Règle : seulement mes projets en cours (on ne modifie plus la liste reçue)
+  const selectableProjects = computed(() =>
+    (projects.value ?? []).filter(
+      (p) =>
+        canReceiveContributions(p.status) || p.id === originalProjectId.value,
+    ),
+  )
 
   const form = reactive({
     duration: 1,
@@ -95,8 +114,9 @@
         form.date = String(c.dateContribution).slice(0, 10)
         form.idUser = userId
         // Le détail ne renvoie pas l'id du projet : on le retrouve grâce à son nom
-        form.idProject =
-          list?.find((p) => p.name === c.project?.name)?.id ?? form.idProject
+        const original = list?.find((p) => p.name === c.project?.name)?.id
+        if (original) originalProjectId.value = original
+        form.idProject = original ?? form.idProject
       },
       { immediate: true },
     )

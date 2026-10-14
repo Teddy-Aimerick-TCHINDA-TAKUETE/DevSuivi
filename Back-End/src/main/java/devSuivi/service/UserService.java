@@ -79,10 +79,6 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    /**
-     * Règle sur les rôles : DEVELOPER est exclusif.
-     * Combinaisons valides : ADMIN, MANAGER, ADMIN + MANAGER, ou DEVELOPER seul.
-     */
     private void verifierRoles(List<String> roles) {
         if (roles == null || roles.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -100,10 +96,6 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    /**
-     * Seul un développeur peut être affecté à un projet ou déclarer une contribution.
-     * @param action ce que l'utilisateur voulait faire, ex. "être affecté à un projet"
-     */
     void verifierDeveloper(User user, String action) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Un utilisateur est obligatoire.");
