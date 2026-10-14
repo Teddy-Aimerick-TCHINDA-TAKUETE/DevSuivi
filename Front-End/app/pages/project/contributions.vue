@@ -31,6 +31,16 @@
         :empty="!contributions.length"
         empty-text="Aucune contribution sur ce projet."
       >
+        <div class="ap-grid">
+          <article class="ap-stat" :class="{ 'ap-over': overQuota }">
+            <strong>{{ totalDuration }}</strong
+            ><span>Durée cumulée du projet</span>
+            <OverQuotaPill
+              :used="totalDuration"
+              :quota="current?.quota ?? Infinity"
+            />
+          </article>
+        </div>
         <DateFilter
           v-model:from="from"
           v-model:to="to"
@@ -47,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-  import { sumDuration } from '~/utils/projectRules'
+  import { isOverQuota, sumDuration } from '~/utils/projectRules'
 
   definePageMeta({ key: (route) => route.fullPath })
 
@@ -69,6 +79,11 @@
     (projects.value ?? []).map((p) => ({ id: p.id, label: p.name })),
   )
   const current = computed(() => projects.value?.find((p) => p.id === id))
+  const totalDuration = computed(() => sumDuration(contributions.value))
+  const overQuota = computed(
+    () =>
+      !!current.value && isOverQuota(totalDuration.value, current.value.quota),
+  )
 </script>
 
 <style scoped></style>
