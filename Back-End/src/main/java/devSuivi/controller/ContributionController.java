@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,8 +38,8 @@ public class ContributionController {
             @ApiResponse(responseCode = "404", description = "Contribution non trouvé",
                     content = @Content)
     } )
-    public ResponseEntity<ContributionDetailDto> getContributionById(@PathVariable Long id){
-        return new ResponseEntity<>(contributionService.getContributionById(id), HttpStatus.OK);
+    public ResponseEntity<ContributionDetailDto> getContributionById(@PathVariable Long id, Authentication authentication){
+        return new ResponseEntity<>(contributionService.getContributionById(id, authentication), HttpStatus.OK);
     }
 
     @PostMapping
@@ -46,8 +47,8 @@ public class ContributionController {
             @ApiResponse(responseCode = "201", description = "Contribution Ajouté",
                     content =  @Content(mediaType = "application/json", schema = @Schema(implementation = ContributionDetailDto.class)) )
     } )
-    public ResponseEntity<ContributionDetailDto> saveContribution(@RequestBody @Valid ContributionNewDto contributionNewDto){
-        return new ResponseEntity<>(contributionService.saveContribution(contributionNewDto), HttpStatus.CREATED);
+    public ResponseEntity<ContributionDetailDto> saveContribution(@RequestBody @Valid ContributionNewDto contributionNewDto, Authentication authentication){
+        return new ResponseEntity<>(contributionService.saveContribution(contributionNewDto, authentication), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id:[\\d]+}")
@@ -57,8 +58,8 @@ public class ContributionController {
             @ApiResponse(responseCode = "404", description = "Contribution non trouvé",
                     content = @Content)
     } )
-    public ResponseEntity<ContributionDetailDto> updateContribution(@PathVariable Long id, @RequestBody @Valid ContributionNewDto contributionNewDto){
-        return new ResponseEntity<>(contributionService.updateContribution(id, contributionNewDto), HttpStatus.OK);
+    public ResponseEntity<ContributionDetailDto> updateContribution(@PathVariable Long id, @RequestBody @Valid ContributionNewDto contributionNewDto, Authentication authentication){
+        return new ResponseEntity<>(contributionService.updateContribution(id, contributionNewDto, authentication), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id:[\\d]+}")
@@ -69,7 +70,7 @@ public class ContributionController {
             @ApiResponse(responseCode = "404", description = "Contribution non trouvé",
                     content = @Content)
     } )
-    public void deleteContribution(@PathVariable Long id){
-        contributionService.deleteContribution(id);
+    public void deleteContribution(@PathVariable Long id, Authentication authentication){
+        contributionService.deleteContribution(id, authentication);
     }
 }

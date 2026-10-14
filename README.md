@@ -114,6 +114,7 @@ Combinaisons autorisées : `ADMIN`, `MANAGER`, `ADMIN` + `MANAGER`, ou `DEVELOPE
 | Seul un `DEVELOPER` peut être affecté à un projet ou déclarer une contribution | API + interface |
 | Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | API + interface |
 | Un développeur n'est affecté qu'à un projet `PLANNED` ou `IN_PROGRESS` | interface uniquement |
+| Un développeur ne lit, déclare, modifie ou supprime que ses propres contributions | API + interface |
 | L'email d'un utilisateur est unique | API |
 | Un utilisateur qui a des affectations ou des contributions doit rester `DEVELOPER` | API |
 
@@ -123,4 +124,4 @@ Combinaisons autorisées : `ADMIN`, `MANAGER`, `ADMIN` + `MANAGER`, ou `DEVELOPE
 
 - Signaler les projets en dépassement de quota (temps consommé > quota).
 - Tableau de bord du responsable : temps par développeur sur une période, projets en dépassement, projets clôturés récemment.
-- Côté API : vérifier l'état du projet lors d'une affectation, et qu'un développeur ne modifie que ses propres contributions.
+- Côté API : vérifier l'état du projet lors d'une affectation.

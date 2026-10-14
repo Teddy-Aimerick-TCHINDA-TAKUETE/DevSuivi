@@ -120,6 +120,7 @@ src/main/java/devSuivi/
 | Seul un `DEVELOPER` peut être affecté à un projet | `AssignService` | 400 |
 | Seul un `DEVELOPER` peut déclarer une contribution | `ContributionService` | 400 |
 | Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | `ContributionService` | 409 |
+| Hors ADMIN et MANAGER, un utilisateur ne lit, déclare, modifie ou supprime que ses propres contributions, et ne lit que ses propres projets et contributions via `/user/{id}/...` | `UserService.verifierAcces` | 403 |
 
 Modifier la durée ou la date d'une contribution existante reste possible même si le projet a été clôturé depuis. Changer son utilisateur ou son projet repasse par les contrôles ci-dessus.
 
@@ -128,6 +129,5 @@ Modifier la durée ou la date d'une contribution existante reste possible même 
 Pas encore géré côté API :
 
 - vérifier l'état du projet lors d'une affectation (`PLANNED` ou `IN_PROGRESS`) : seule l'interface le contrôle pour l'instant ;
-- vérifier qu'un développeur ne modifie ou ne supprime que ses propres contributions ;
 - calculer le temps consommé et l'indicateur de dépassement de quota ;
 - fournir les données du tableau de bord (temps par développeur sur une période, projets en dépassement, projets clôturés récemment).

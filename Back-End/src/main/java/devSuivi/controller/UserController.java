@@ -55,13 +55,13 @@ public class UserController {
     }
 
     @GetMapping("/{id:[\\d]+}/projects")
-    public List<ProjectListDto> getProjectsByUserId(@PathVariable Long id){
-        return userService.getProjectsByUserId(id);
+    public List<ProjectListDto> getProjectsByUserId(@PathVariable Long id, Authentication authentication){
+        return userService.getProjectsByUserId(id, authentication);
     }
 
     @GetMapping("/{id:[\\d]+}/contributions")
-    public List<ContributionListDto> getContributionsByUserId(@PathVariable Long id){
-        return userService.getContributionsByUserId(id);
+    public List<ContributionListDto> getContributionsByUserId(@PathVariable Long id, Authentication authentication){
+        return userService.getContributionsByUserId(id, authentication);
     }
 
     @PostMapping

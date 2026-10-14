@@ -14,6 +14,7 @@ import devSuivi.repository.AssignRepositoty;
 import devSuivi.repository.ContributionRepositoty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,8 +44,9 @@ public class ContributionService {
     }
 
     @Transactional(readOnly = true)
-    public ContributionDetailDto getContributionById(Long id){
+    public ContributionDetailDto getContributionById(Long id, Authentication authentication){
         var contribution = getEntityContributionById(id);
+        userService.verifierAcces(authentication, contribution.getUser().getId());
         var userListDto = userMapper.toUserListDto(contribution.getUser());
         var projectListDto = projectMapper.toProjectListDto(contribution.getProject());
         return contributionMapper.toContributionDetailDto(contribution, userListDto, projectListDto);
@@ -75,7 +77,9 @@ public class ContributionService {
     }
 
     @Transactional
-    public ContributionDetailDto saveContribution(ContributionNewDto contributionNewDto){
+    public ContributionDetailDto saveContribution(ContributionNewDto contributionNewDto, Authentication authentication){
+        // Un développeur ne déclare du temps que pour lui-même
+        userService.verifierAcces(authentication, contributionNewDto.idUser());
         var contribution = contributionMapper.toContribution(contributionNewDto);
         var user = userService.getEntityUserById(contributionNewDto.idUser());
         userService.verifierDeveloper(user, "déclarer une contribution");
@@ -90,8 +94,11 @@ public class ContributionService {
     }
 
     @Transactional
-    public ContributionDetailDto updateContribution(Long id, ContributionNewDto contributionNewDto){
+    public ContributionDetailDto updateContribution(Long id, ContributionNewDto contributionNewDto, Authentication authentication){
         var contribution = getEntityContributionById(id);
+        // La contribution doit être la sienne, et le rester
+        userService.verifierAcces(authentication, contribution.getUser().getId());
+        userService.verifierAcces(authentication, contributionNewDto.idUser());
         // Qui et sur quel projet, avant que le mapper ne touche à la contribution
         boolean memeUser = contribution.getUser() != null
                 && contribution.getUser().getId().equals(contributionNewDto.idUser());
@@ -115,8 +122,9 @@ public class ContributionService {
     }
 
     @Transactional
-    public void deleteContribution(Long id){
-        getEntityContributionById(id);
+    public void deleteContribution(Long id, Authentication authentication){
+        var contribution = getEntityContributionById(id);
+        userService.verifierAcces(authentication, contribution.getUser().getId());
         contributionRepositoty.deleteById(id);
     }
 }

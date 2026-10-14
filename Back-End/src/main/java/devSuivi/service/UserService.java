@@ -9,6 +9,8 @@ import devSuivi.mapper.UserMapper;
 import devSuivi.repository.UserRepositoty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,12 +62,14 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectListDto> getProjectsByUserId(Long id){
+    public List<ProjectListDto> getProjectsByUserId(Long id, Authentication authentication){
+        verifierAcces(authentication, id);
         return getListProject(id);
     }
 
     @Transactional(readOnly = true)
-    public List<ContributionListDto> getContributionsByUserId(Long id) {
+    public List<ContributionListDto> getContributionsByUserId(Long id, Authentication authentication) {
+        verifierAcces(authentication, id);
         return getEntityUserById(id).getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
                 .toList();
@@ -93,6 +97,25 @@ public class UserService implements UserDetailsService {
         if (roles.contains(DEVELOPER) && (roles.contains(ADMIN) || roles.contains(MANAGER))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Le rôle DEVELOPER ne peut pas être combiné avec ADMIN ou MANAGER.");
+        }
+    }
+
+    /** ADMIN ou MANAGER : accès aux données de tous les utilisateurs. */
+    boolean estResponsable(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals("ROLE_" + ADMIN) || a.equals("ROLE_" + MANAGER));
+    }
+
+    /** Un utilisateur qui n'est pas responsable n'accède qu'à ses propres données. */
+    void verifierAcces(Authentication authentication, Long idUser) {
+        if (estResponsable(authentication)) {
+            return;
+        }
+        var connecte = loadUserByUsername(authentication.getName());
+        if (!connecte.getId().equals(idUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Accès refusé : ces données appartiennent à un autre utilisateur.");
         }
     }
 
