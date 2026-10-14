@@ -72,7 +72,14 @@
   const message = ref('')
 
   async function remove() {
-    if (!confirm('Retirer cette affectation ?')) return
+    if (
+      !(await askConfirm({
+        title: 'Retirer l’affectation',
+        message: 'Cet utilisateur ne sera plus affecté à ce projet.',
+        confirmLabel: 'Retirer',
+      }))
+    )
+      return
     const { error: err } = await deleteAssign({
       user: userId,
       project: projectId,

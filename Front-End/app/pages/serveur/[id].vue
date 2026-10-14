@@ -43,7 +43,14 @@
   const message = ref('')
 
   async function remove() {
-    if (!confirm(`Supprimer le serveur « ${server.value?.name} » ?`)) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer le serveur',
+        message: `« ${server.value?.name} » sera supprimé définitivement, ainsi que tous les projets qu’il héberge.`,
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteServer(id)
     if (err.value) {
       message.value = errorMessage(err.value)

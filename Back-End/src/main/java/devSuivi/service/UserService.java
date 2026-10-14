@@ -8,12 +8,13 @@ import devSuivi.mapper.ProjectMapper;
 import devSuivi.mapper.UserMapper;
 import devSuivi.repository.UserRepositoty;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,7 +23,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-    private final UserRepositoty userRepositoty;
+    private final UserRepositoty userRepository;
     private final UserMapper userMapper;
     private final ProjectMapper projectMapper;
     private final ContributionMapper contributionMapper;
@@ -30,7 +31,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public List<UserListDto> getAllUsers(){
-        return userRepositoty.findAll().stream()
+        return userRepository.findAll().stream()
                 .map(userMapper::toUserListDto)
                 .toList();
     }
@@ -67,7 +68,7 @@ public class UserService implements UserDetailsService {
         if(id == null){
             return null;
         } else {
-            return userRepositoty.findById(id).orElseThrow( ()-> new NoSuchElementException("User inconnue : " + id) );
+            return userRepository.findById(id).orElseThrow( ()-> new NoSuchElementException("User inconnue : " + id) );
         }
     }
 
@@ -79,10 +80,14 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserDetailDto saveUser(UserNewDto userNewDto){
+    public UserDetailDto saveUser(UserNewDto userNewDto) {
+        if (userRepository.existsByEmailIgnoreCase(userNewDto.email())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Cet email est déjà utilisé.");
+        }
         var user = userMapper.toUser(userNewDto);
         user.setPassword(passwordEncoder.encode(userNewDto.password()));
-        var saved = userRepositoty.save(user);
+        var saved = userRepository.save(user);
         List<ProjectListDto> projects = getListProject(saved.getId());
         List<ContributionListDto> contributionListDtos = saved.getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
@@ -95,7 +100,7 @@ public class UserService implements UserDetailsService {
         var user = getEntityUserById(id);
         userMapper.updateUser(userNewDto, user);
         user.setPassword(passwordEncoder.encode(userNewDto.password()));
-        var saved = userRepositoty.save(user);
+        var saved = userRepository.save(user);
         List<ProjectListDto> projects = getListProject(saved.getId());
         List<ContributionListDto> contributionListDtos = saved.getContributions().stream()
                 .map(contributionMapper::toContributionListDto)
@@ -106,7 +111,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public void deleteUser(Long id){
         getEntityUserById(id);
-        userRepositoty.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     @Override
@@ -114,7 +119,7 @@ public class UserService implements UserDetailsService {
         if(username == null){
             return null;
         } else {
-            return userRepositoty.findByEmail(username).orElseThrow( ()-> new UsernameNotFoundException("User inconnue : " + username) );
+            return userRepository.findByEmail(username).orElseThrow( ()-> new UsernameNotFoundException("User inconnue : " + username) );
         }
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "User Ajouté",
                     content =  @Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailDto.class)) )
     } )
-    public ResponseEntity<UserDetailDto> saveUser(@RequestBody @Valid UserNewDto userNewDto){
+    public ResponseEntity<UserDetailDto> saveUser(@RequestBody @Valid UserNewDto userNewDto) {
         return new ResponseEntity<>(userService.saveUser(userNewDto), HttpStatus.CREATED);
     }
 

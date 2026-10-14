@@ -53,16 +53,26 @@
                 required
               />
             </label>
+            <small
+              v-if="form.confirm && form.password !== form.confirm"
+              class="ap-error"
+            >
+              Les mots de passe ne correspondent pas.
+            </small>
           </div>
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
             {{ message }}
           </p>
-          <button type="submit" :aria-busy="loading" :disabled="loading">
+          <button
+            type="submit"
+            :aria-busy="loading"
+            :disabled="loading || !canSubmit"
+          >
             Créer mon compte
           </button>
         </form>
         <footer class="ap-muted">
-          Déjà inscrit ? <NuxtLink to="/loging">Connectez-vous</NuxtLink>
+          Déjà inscrit ? <NuxtLink to="/login">Connectez-vous</NuxtLink>
         </footer>
       </article>
     </AppPage>
@@ -76,7 +86,7 @@
     layout: 'login-layout',
   })
 
-  const { saveUser } = useApiUser()
+  const { register } = useApiAuth()
   const form = reactive({
     firstName: '',
     lastName: '',
@@ -86,6 +96,15 @@
   })
   const loading = ref(false)
   const message = ref('')
+  const canSubmit = computed(
+    () =>
+      form.firstName.trim() !== '' &&
+      form.lastName.trim() !== '' &&
+      /^\S+@\S+\.\S+$/.test(form.email.trim()) &&
+      form.password !== '' &&
+      form.confirm !== '' &&
+      form.password === form.confirm,
+  )
 
   async function submit() {
     message.value = ''
@@ -94,19 +113,19 @@
       return
     }
     loading.value = true
-    const { error } = await saveUser({
+    const { error } = await register({
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
       password: form.password,
-      roles: ['USER'],
+      roles: ['DEVELOPER'],
     })
     loading.value = false
     if (error.value) {
       message.value = errorMessage(error.value)
       return
     }
-    await navigateTo('/loging')
+    await navigateTo('/login')
   }
 </script>
 

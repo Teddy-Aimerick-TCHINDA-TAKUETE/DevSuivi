@@ -87,7 +87,14 @@
   const message = ref('')
 
   async function remove() {
-    if (!confirm(`Supprimer « ${fullName(user.value)} » ?`)) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer l’utilisateur',
+        message: `« ${fullName(user.value)} » sera supprimé définitivement, ainsi que ses affectations et ses contributions.`,
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteUser(id)
     if (err.value) {
       message.value = errorMessage(err.value)

@@ -99,7 +99,14 @@
   })
 
   async function remove(id: number, name: string) {
-    if (!confirm(`Supprimer le projet « ${name} » ?`)) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer le projet',
+        message: `« ${name} » sera supprimé définitivement, ainsi que ses affectations et ses contributions.`,
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteProject(id)
     message.value = err.value ? errorMessage(err.value) : ''
     await refresh()

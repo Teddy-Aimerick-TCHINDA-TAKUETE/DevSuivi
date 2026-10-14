@@ -86,7 +86,14 @@
   )
 
   async function remove(id: number) {
-    if (!confirm('Supprimer cette contribution ?')) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer la contribution',
+        message: 'Cette contribution sera supprimée définitivement.',
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteContribution(id)
     message.value = err.value ? errorMessage(err.value) : ''
     await refresh()

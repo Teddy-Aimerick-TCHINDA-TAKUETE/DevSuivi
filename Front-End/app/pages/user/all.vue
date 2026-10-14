@@ -95,7 +95,14 @@
   })
 
   async function remove(id: number, name: string) {
-    if (!confirm(`Supprimer l’utilisateur « ${name} » ?`)) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer l’utilisateur',
+        message: `« ${name} » sera supprimé définitivement, ainsi que ses affectations et ses contributions.`,
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteUser(id)
     message.value = err.value ? errorMessage(err.value) : ''
     await refresh()

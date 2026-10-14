@@ -88,7 +88,11 @@
 
   async function remove(a: AssignListDto) {
     if (
-      !confirm(`Retirer ${fullName(a.user)} du projet « ${a.project.name} » ?`)
+      !(await askConfirm({
+        title: 'Retirer l’affectation',
+        message: `${fullName(a.user)} ne sera plus affecté au projet « ${a.project.name} ».`,
+        confirmLabel: 'Retirer',
+      }))
     )
       return
     const { error: err } = await deleteAssign({

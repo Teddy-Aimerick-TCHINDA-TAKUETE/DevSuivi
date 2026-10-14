@@ -1,11 +1,22 @@
 package devSuivi.security;
 
+import devSuivi.dto.UserDetailDto;
+import devSuivi.dto.UserNewDto;
 import devSuivi.security.dto.AuthRequestDto;
 import devSuivi.security.dto.AuthResponseDto;
 import devSuivi.security.dto.RefreshTokenDto;
+import devSuivi.service.UserService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,13 +25,31 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/login")
+    @ApiResponses( {
+            @ApiResponse(responseCode = "201", description = "User Connecté",
+                    content =  @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) )
+    } )
     AuthResponseDto login(@RequestBody AuthRequestDto authRequestDto){
         return authService.login(authRequestDto);
     }
 
+    @PostMapping("/register")
+    @ApiResponses( {
+            @ApiResponse(responseCode = "201", description = "User enregistré",
+                    content =  @Content(mediaType = "application/json", schema = @Schema(implementation = UserDetailDto.class)) )
+    } )
+    public ResponseEntity<UserDetailDto> register(@RequestBody @Valid UserNewDto userNewDto) {
+        return new ResponseEntity<>(userService.saveUser(userNewDto), HttpStatus.CREATED);
+    }
+
     @PostMapping("/refresh")
+    @ApiResponses( {
+            @ApiResponse(responseCode = "201", description = "User Connecté",
+                    content =  @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) )
+    } )
     AuthResponseDto refresh(@RequestBody RefreshTokenDto refreshTokenDto){
         return authService.refresh(refreshTokenDto);
     }

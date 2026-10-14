@@ -26,7 +26,11 @@
           <p v-if="message" class="ap-error" style="padding: 0.6rem 0.9rem">
             {{ message }}
           </p>
-          <button type="submit" :aria-busy="loading" :disabled="loading">
+          <button
+            type="submit"
+            :aria-busy="loading"
+            :disabled="loading || !canSubmit"
+          >
             Se connecter
           </button>
         </form>
@@ -51,6 +55,9 @@
   const form = reactive<AuthRequestDto>({ email: '', password: '' })
   const loading = ref(false)
   const message = ref('')
+  const canSubmit = computed(
+    () => form.email.trim() !== '' && form.password !== '',
+  )
   const route = useRoute()
 
   async function submit() {

@@ -86,7 +86,14 @@
   })
 
   async function remove(id: number, name: string) {
-    if (!confirm(`Supprimer le serveur « ${name} » ?`)) return
+    if (
+      !(await askConfirm({
+        title: 'Supprimer le serveur',
+        message: `« ${name} » sera supprimé définitivement, ainsi que tous les projets qu’il héberge.`,
+        confirmLabel: 'Supprimer',
+      }))
+    )
+      return
     const { error: err } = await deleteServer(id)
     message.value = err.value ? errorMessage(err.value) : ''
     await refresh()
