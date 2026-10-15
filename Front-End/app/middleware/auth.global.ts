@@ -4,6 +4,14 @@ import type { UserListDto } from '~/types/userTypes'
 const inSection = (path: string, base: string) =>
   path === base || path.startsWith(`${base}/`)
 
+async function userPage(to: { path: string; query: Record<string, any> }) {
+  const { hasRole } = useAuth()
+  if (hasRole('DEVELOPER')) return false
+  if (hasRole('ADMIN')) return true
+  if (['/user/save'].includes(to.path) && !hasRole('ADMIN')) return false
+  return true
+}
+
 async function isOwnUserPage(to: { path: string; query: Record<string, any> }) {
   const config = useRuntimeConfig()
   const apiBase = config.public.apiBase
@@ -132,7 +140,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     throw forbidden()
   if (
     inSection(to.path, '/user') &&
-    !hasRole('ADMIN') &&
+    !(await userPage(to)) &&
     !(await isOwnUserPage(to)) &&
     !(await isOwnProjectPage(to)) &&
     !(await isOwnCotributionPage(to))

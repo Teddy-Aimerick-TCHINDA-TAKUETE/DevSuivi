@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,18 +36,18 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project non trouvé",
                     content = @Content)
     } )
-    public ResponseEntity<ProjectDetailDto> getProjectById(@PathVariable Long id){
-        return new ResponseEntity<>(projectService.getProjectById(id), HttpStatus.OK);
+    public ResponseEntity<ProjectDetailDto> getProjectById(@PathVariable Long id, Authentication authentication){
+        return new ResponseEntity<>(projectService.getProjectById(id, authentication), HttpStatus.OK);
     }
 
     @GetMapping("/{id:[\\d]+}/users")
-    public List<UserListDto> getUsersByProjectId(@PathVariable Long id){
-        return projectService.getUsersByProjectId(id);
+    public List<UserListDto> getUsersByProjectId(@PathVariable Long id, Authentication authentication){
+        return projectService.getUsersByProjectId(id, authentication);
     }
 
     @GetMapping("/{id:[\\d]+}/contributions")
-    public List<ContributionListDto> getContributionsByProjectId(@PathVariable Long id){
-        return projectService.getContributionsByProjectId(id);
+    public List<ContributionListDto> getContributionsByProjectId(@PathVariable Long id, Authentication authentication){
+        return projectService.getContributionsByProjectId(id, authentication);
     }
 
     @PostMapping

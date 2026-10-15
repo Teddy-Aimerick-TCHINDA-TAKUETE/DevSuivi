@@ -59,6 +59,7 @@
       },
       { to: '/project', label: 'Projets', show: hasRole('ADMIN', 'MANAGER') },
       { to: '/server', label: 'Serveurs', show: hasRole('ADMIN') },
+      { to: '/user', label: 'Developpeurs', show: hasRole('MANAGER') },
       { to: '/user', label: 'Utilisateurs', show: hasRole('ADMIN') },
       {
         to: '/contribution',

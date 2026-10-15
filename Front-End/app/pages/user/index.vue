@@ -11,7 +11,11 @@
         <NuxtLink to="/user/contributions" role="button" class="ap-btn"
           >Contributions par user</NuxtLink
         >
-        <NuxtLink to="/user/save" role="button" class="ap-btn"
+        <NuxtLink
+          v-if="hasRole('ADMIN')"
+          to="/user/save"
+          role="button"
+          class="ap-btn"
           >+ Nouvel utilisateur</NuxtLink
         >
         <NuxtLink to="/user/all" role="button" class="ap-btn ap-ghost"
@@ -26,15 +30,15 @@
         empty-text="Aucun utilisateur pour le moment."
       >
         <div class="ap-grid">
-          <article class="ap-stat">
+          <article v-if="hasRole('ADMIN')" class="ap-stat">
             <strong>{{ users?.length }}</strong
             ><span>Utilisateurs</span>
           </article>
-          <article class="ap-stat">
+          <article v-if="hasRole('ADMIN')" class="ap-stat">
             <strong>{{ admins }}</strong
             ><span>Administrateurs</span>
           </article>
-          <article class="ap-stat">
+          <article v-if="hasRole('ADMIN')" class="ap-stat">
             <strong>{{ managers }}</strong
             ><span>Responsables</span>
           </article>
@@ -56,25 +60,23 @@
 
 <script setup lang="ts">
   const { data: users, status, error } = await useApiUser().getAllUsers()
-  const recent = computed(() =>
-    [...(users.value ?? [])].sort((a, b) => b.id - a.id).slice(0, 6),
-  )
+  const { hasRole } = useAuth()
+  const recent = computed(() => {
+    if (!hasRole('ADMIN')) {
+      users.value = users.value?.filter((u) => u.roles.includes('DEVELOPER'))
+    }
+    return [...(users.value ?? [])].sort((a, b) => b.id - a.id).slice(0, 6)
+  })
   const admins = computed(
-    () =>
-      (users.value ?? []).filter((u) => u.roles?.some((r) => /admin/i.test(r)))
-        .length,
+    () => (users.value ?? []).filter((u) => u.roles?.includes('ADMIN')).length,
   )
   const managers = computed(
     () =>
-      (users.value ?? []).filter((u) =>
-        u.roles?.some((r) => /manager/i.test(r)),
-      ).length,
+      (users.value ?? []).filter((u) => u.roles?.includes('MANAGER')).length,
   )
   const developers = computed(
     () =>
-      (users.value ?? []).filter((u) =>
-        u.roles?.some((r) => /developer/i.test(r)),
-      ).length,
+      (users.value ?? []).filter((u) => u.roles?.includes('DEVELOPER')).length,
   )
 </script>
 

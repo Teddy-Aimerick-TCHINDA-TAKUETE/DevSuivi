@@ -5,7 +5,7 @@
       subtitle="Recherchez, modifiez ou supprimez des comptes."
       back="/user"
     >
-      <template #actions>
+      <template v-if="hasRole('ADMIN')" #actions>
         <NuxtLink to="/user/save" role="button" class="ap-btn"
           >+ Nouvel utilisateur</NuxtLink
         >
@@ -31,7 +31,7 @@
                 <th>Utilisateur</th>
                 <th>Email</th>
                 <th>Rôles</th>
-                <th></th>
+                <th v-if="hasRole('ADMIN')"></th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +52,7 @@
                     >{{ r }}</span
                   >
                 </td>
-                <td class="ap-cell-actions">
+                <td v-if="hasRole('ADMIN')" class="ap-cell-actions">
                   <NuxtLink
                     :to="`/user/save?id=${u.id}`"
                     role="button"
@@ -80,11 +80,15 @@
 
   const { getAllUsers, deleteUser } = useApiUser()
   const { data: users, status, error, refresh } = await getAllUsers()
+  const { hasRole } = useAuth()
 
   const search = ref('')
   const message = ref('')
   const filtered = computed(() => {
     const q = search.value.trim().toLowerCase()
+    if (!hasRole('ADMIN')) {
+      users.value = users.value?.filter((u) => u.roles.includes('DEVELOPER'))
+    }
     return (users.value ?? []).filter(
       (u) =>
         !q ||

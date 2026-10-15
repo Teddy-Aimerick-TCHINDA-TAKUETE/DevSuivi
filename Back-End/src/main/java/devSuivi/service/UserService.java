@@ -97,14 +97,12 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    /** ADMIN ou MANAGER : accès aux données de tous les utilisateurs. */
     boolean estResponsable(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(a -> a.equals("ROLE_" + ADMIN) || a.equals("ROLE_" + MANAGER));
     }
 
-    /** Un utilisateur qui n'est pas responsable n'accède qu'à ses propres données. */
     void verifierAcces(Authentication authentication, Long idUser) {
         if (estResponsable(authentication)) {
             return;
@@ -134,7 +132,6 @@ public class UserService implements UserDetailsService {
                 .toList();
     }
 
-    /** 409 si l'email est déjà pris par un AUTRE utilisateur. */
     private void verifierEmailLibre(User user, String nouvelEmail) {
         if (!user.getEmail().equalsIgnoreCase(nouvelEmail)
                 && userRepository.existsByEmailIgnoreCase(nouvelEmail)) {
@@ -142,7 +139,6 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    /** Mot de passe vide ou absent = on garde l'ancien. */
     private void appliquerMotDePasse(User user, String ancienHash, String nouveau) {
         user.setPassword(nouveau == null || nouveau.isBlank()
                 ? ancienHash

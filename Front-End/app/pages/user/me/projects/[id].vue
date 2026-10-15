@@ -85,7 +85,7 @@
           </p>
 
           <div class="ap-section-title">
-            <h3>Contributions</h3>
+            <h3>Mes contributions</h3>
             <NuxtLink :to="`/user/me/projects/contributions?id=${id}`"
               >Voir tout →</NuxtLink
             >
@@ -139,6 +139,10 @@
     const ids = new Set((mine.value ?? []).map((c) => c.id))
     return (project.value?.contributions ?? []).filter((c) => ids.has(c.id))
   })
+
+  // const myContributions = computed(() => {
+  //   return project.value?.contributions ?? []
+  // })
 
   const usedTime = computed(() => sumDuration(project.value?.contributions))
   const myUsedTime = computed(() => sumDuration(myContributions.value))

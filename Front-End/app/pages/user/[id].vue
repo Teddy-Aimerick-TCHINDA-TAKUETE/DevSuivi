@@ -5,7 +5,7 @@
       :subtitle="user?.email"
       back="/user/all"
     >
-      <template #actions>
+      <template v-if="hasRole('ADMIN')" #actions>
         <NuxtLink :to="`/user/save?id=${id}`" role="button" class="ap-btn"
           >Modifier</NuxtLink
         >
@@ -100,6 +100,7 @@
   const { getUserById, deleteUser } = useApiUser()
   const { data: user, status, error } = await getUserById(id)
   const message = ref('')
+  const { hasRole } = useAuth()
 
   // Seuls les développeurs ont des projets et des contributions
   const isDeveloper = computed(() => !!user.value?.roles?.includes('DEVELOPER'))

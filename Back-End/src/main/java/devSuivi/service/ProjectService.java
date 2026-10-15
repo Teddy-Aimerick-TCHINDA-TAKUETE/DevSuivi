@@ -2,15 +2,22 @@ package devSuivi.service;
 
 import devSuivi.dto.*;
 import devSuivi.entity.Assign;
+import devSuivi.entity.AssignId;
 import devSuivi.entity.Project;
+import devSuivi.entity.User;
 import devSuivi.mapper.ContributionMapper;
 import devSuivi.mapper.ProjectMapper;
 import devSuivi.mapper.UserMapper;
+import devSuivi.repository.AssignRepositoty;
 import devSuivi.repository.ProjectRepositoty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,8 +27,10 @@ import java.util.NoSuchElementException;
 public class ProjectService {
 
     private final ProjectRepositoty projectRepositoty;
+    private final AssignRepositoty assignRepositoty;
     @Lazy
     private final ServerService serverService;
+    private final UserService userService;
     private final ProjectMapper projectMapper;
     private final UserMapper userMapper;
     private final ContributionMapper contributionMapper;
@@ -34,25 +43,23 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public ProjectDetailDto getProjectById(Long id){
+    public ProjectDetailDto getProjectById(Long id, Authentication authentication){
         var project = getEntityProjectById(id);
+        var connecte = verifierAccesProjet(project, authentication);
         List<UserListDto> users = getListUser(project.getId());
-        List<ContributionListDto> contributionListDtos = project.getContributions().stream()
-                .map(contributionMapper::toContributionListDto)
-                .toList();
-        return projectMapper.toProjectDetailDto(project, users, contributionListDtos);
+        return projectMapper.toProjectDetailDto(project, users, contributionsVisibles(project, connecte));
     }
 
     @Transactional(readOnly = true)
-    public List<UserListDto> getUsersByProjectId(Long id) {
+    public List<UserListDto> getUsersByProjectId(Long id, Authentication authentication) {
+        verifierAccesProjet(getEntityProjectById(id), authentication);
         return getListUser(id);
     }
 
     @Transactional(readOnly = true)
-    public List<ContributionListDto> getContributionsByProjectId(Long id) {
-        return getEntityProjectById(id).getContributions().stream()
-                .map(contributionMapper::toContributionListDto)
-                .toList();
+    public List<ContributionListDto> getContributionsByProjectId(Long id, Authentication authentication) {
+        var project = getEntityProjectById(id);
+        return contributionsVisibles(project, verifierAccesProjet(project, authentication));
     }
 
     Project getEntityProjectById(Long id){
@@ -73,6 +80,26 @@ public class ProjectService {
     List<Project> getAllProjectByServerId(Long id){
         var server = serverService.getEntityServerById(id);
         return projectRepositoty.findAllByServer(server);
+    }
+
+    private User verifierAccesProjet(Project project, Authentication authentication) {
+        if (userService.estResponsable(authentication)) {
+            return null;
+        }
+        var connecte = userService.loadUserByUsername(authentication.getName());
+        if (!assignRepositoty.existsById(new AssignId(connecte.getId(), project.getId()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Accès refusé : vous n'êtes pas affecté à ce projet.");
+        }
+        return connecte;
+    }
+
+    private List<ContributionListDto> contributionsVisibles(Project project, User connecte) {
+        return project.getContributions().stream()
+                .filter(c -> connecte == null
+                        || (c.getUser() != null && connecte.getId().equals(c.getUser().getId())))
+                .map(contributionMapper::toContributionListDto)
+                .toList();
     }
 
     @Transactional
