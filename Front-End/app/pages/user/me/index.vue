@@ -41,6 +41,18 @@
             </div>
 
             <div class="ap-section-title">
+              <h3>Durée cumulée par projet</h3>
+            </div>
+            <ProjectDurationTable
+              v-if="contributions?.length"
+              :items="contributions"
+              base="/user/me/projects"
+            />
+            <p v-else class="ap-empty ap-muted">
+              Aucune contribution enregistrée.
+            </p>
+
+            <div class="ap-section-title">
               <h3>Projets</h3>
               <NuxtLink :to="`/user/me/projects`">Voir tout →</NuxtLink>
             </div>
@@ -56,6 +68,7 @@
             <ContributionTableMe
               v-if="contributions?.length"
               :items="contributions"
+              show-project
             />
             <p v-else class="ap-empty ap-muted">
               Aucune contribution enregistrée.

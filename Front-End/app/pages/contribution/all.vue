@@ -22,6 +22,10 @@
         <DateFilter
           v-model:from="from"
           v-model:to="to"
+          v-model:user="user"
+          v-model:project="project"
+          :users="developers"
+          :projects="projectChoices"
           :count="filtered.length"
           :total="sumDuration(filtered)"
         />
@@ -34,6 +38,8 @@
               <tr>
                 <!-- <th>#</th> -->
                 <th>Date</th>
+                <th>Développeur</th>
+                <th>Projet</th>
                 <th>Durée</th>
                 <th></th>
               </tr>
@@ -42,6 +48,8 @@
               <tr v-for="c in filtered" :key="c.id">
                 <!-- <td class="ap-muted">{{ c.id }}</td> -->
                 <td>{{ formatDate(c.dateContribution) }}</td>
+                <td>{{ c.userName ?? '—' }}</td>
+                <td>{{ c.projectName ?? '—' }}</td>
                 <td>
                   <span class="ap-pill">{{ formatDuration(c.duration) }}</span>
                 </td>
@@ -90,11 +98,22 @@
     ),
   )
 
-  // Filtre par date (bornes incluses)
+  // Filtres : développeur et projet (liés l'un à l'autre, 0 = tous) + période
   const from = ref('')
   const to = ref('')
+  const user = ref(0)
+  const project = ref(0)
+  const developers = computed(() => userOptions(sorted.value, project.value))
+  const projectChoices = computed(() =>
+    projectOptions(sorted.value, user.value),
+  )
   const filtered = computed(() =>
-    filterByDate(sorted.value, from.value, to.value),
+    filterContributions(sorted.value, {
+      user: user.value,
+      project: project.value,
+      from: from.value,
+      to: to.value,
+    }),
   )
 
   async function remove(id: number) {

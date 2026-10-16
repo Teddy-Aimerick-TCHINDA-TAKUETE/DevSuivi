@@ -22,6 +22,8 @@
         <DateFilter
           v-model:from="from"
           v-model:to="to"
+          v-model:project="project"
+          :projects="projectChoices"
           :count="filtered.length"
           :total="sumDuration(filtered)"
         />
@@ -34,6 +36,7 @@
               <tr>
                 <!-- <th>#</th> -->
                 <th>Date</th>
+                <th>Projet</th>
                 <th>Durée</th>
                 <th></th>
               </tr>
@@ -42,6 +45,7 @@
               <tr v-for="c in filtered" :key="c.id">
                 <!-- <td class="ap-muted">{{ c.id }}</td> -->
                 <td>{{ formatDate(c.dateContribution) }}</td>
+                <td>{{ c.projectName ?? '—' }}</td>
                 <td>
                   <span class="ap-pill">{{ formatDuration(c.duration) }}</span>
                 </td>
@@ -95,11 +99,17 @@
     ),
   )
 
-  // Filtre par date (bornes incluses)
+  // Filtres : projet (0 = tous) et date (bornes incluses)
   const from = ref('')
   const to = ref('')
+  const project = ref(0)
+  const projectChoices = computed(() => distinctProjects(sorted.value))
   const filtered = computed(() =>
-    filterByDate(sorted.value, from.value, to.value),
+    filterContributions(sorted.value, {
+      project: project.value,
+      from: from.value,
+      to: to.value,
+    }),
   )
 
   async function remove(id: number) {

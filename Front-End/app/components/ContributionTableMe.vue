@@ -4,6 +4,7 @@
       <thead>
         <tr>
           <th>Date</th>
+          <th v-if="showProject">Projet</th>
           <th>Durée</th>
           <th></th>
         </tr>
@@ -11,6 +12,7 @@
       <tbody>
         <tr v-for="c in items" :key="c.id">
           <td>{{ formatDate(c.dateContribution) }}</td>
+          <td v-if="showProject">{{ c.projectName ?? '—' }}</td>
           <td>
             <span class="ap-pill">{{ formatDuration(c.duration) }}</span>
           </td>
@@ -29,7 +31,13 @@
   import { formatDate } from '~/utils/format'
 
   defineProps<{
-    items: { id: number; duration: number; dateContribution: string | Date }[]
+    items: {
+      id: number
+      duration: number
+      dateContribution: string | Date
+      projectName?: string
+    }[]
+    showProject?: boolean
   }>()
 </script>
 

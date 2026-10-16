@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-10-14T12:20:25+0200",
+    date = "2026-10-16T11:38:05+0200",
     comments = "version: 1.6.3, compiler: javac, environment: Java 25.0.4.1 (Eclipse Adoptium)"
 )
 @Component
@@ -142,7 +142,12 @@ public class ProjectMapperImpl implements ProjectMapper {
         duration = contribution.getDuration();
         dateContribution = contribution.getDateContribution();
 
-        ContributionListDto contributionListDto = new ContributionListDto( id, duration, dateContribution );
+        Long idUser = null;
+        String userName = null;
+        Long idProject = null;
+        String projectName = null;
+
+        ContributionListDto contributionListDto = new ContributionListDto( id, duration, dateContribution, idUser, userName, idProject, projectName );
 
         return contributionListDto;
     }

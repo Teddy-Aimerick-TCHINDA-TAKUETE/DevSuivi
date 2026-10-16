@@ -11,6 +11,11 @@ public interface ContributionMapper {
 
     Contribution toContribution(ContributionNewDto contributionNewDto);
 
+    @Mapping(source = "user.id", target = "idUser")
+    @Mapping(target = "userName",
+            expression = "java(contribution.getUser() == null ? null : contribution.getUser().getFirstName() + \" \" + contribution.getUser().getLastName())")
+    @Mapping(source = "project.id", target = "idProject")
+    @Mapping(source = "project.name", target = "projectName")
     ContributionListDto toContributionListDto(Contribution contribution);
 
     @Mapping(source = "contribution.id", target = "id")

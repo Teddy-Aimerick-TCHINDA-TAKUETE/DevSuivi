@@ -16,6 +16,11 @@
         type="search"
         placeholder="Rechercher un projet, un statut, un serveur…"
       />
+      <ProjectFilter
+        v-model:status="statusFilter"
+        v-model:over-only="overOnly"
+        :items="projects ?? []"
+      />
       <article v-if="message" class="ap-error">{{ message }}</article>
 
       <DataState
@@ -86,11 +91,16 @@
   const { data: projects, status, error, refresh } = await getAllProjects()
 
   const search = ref('')
+  const statusFilter = ref('')
+  const overOnly = ref(false)
   const message = ref('')
 
   const filtered = computed(() => {
     const q = search.value.trim().toLowerCase()
-    return (projects.value ?? []).filter(
+    return filterProjects(projects.value ?? [], {
+      status: statusFilter.value,
+      overOnly: overOnly.value,
+    }).filter(
       (p) =>
         !q ||
         `${p.name} ${p.status} ${p.server?.name ?? ''}`

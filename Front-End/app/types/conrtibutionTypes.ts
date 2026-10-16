@@ -13,6 +13,11 @@ export interface ContributionListDto {
   id: number
   duration: number
   dateContribution: Date
+  // Renvoyés par le Back-End : développeur et projet de la contribution
+  idUser?: number
+  userName?: string
+  idProject?: number
+  projectName?: string
 }
 
 export interface ContributionNewDto {

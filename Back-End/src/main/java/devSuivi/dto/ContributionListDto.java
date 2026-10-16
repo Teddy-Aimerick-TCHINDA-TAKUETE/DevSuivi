@@ -6,5 +6,9 @@ import java.util.Date;
 public record ContributionListDto(
         Long id,
         long duration,
-        LocalDate dateContribution) {
+        LocalDate dateContribution,
+        Long idUser,
+        String userName,
+        Long idProject,
+        String projectName) {
 }

@@ -25,3 +25,30 @@ export const sumDuration = (items: { duration: number }[] = []) =>
  */
 export const isOverQuota = (usedMinutes = 0, quotaHours = 0) =>
   usedMinutes > quotaInMinutes(quotaHours)
+
+// ---------- Filtres des listes de projets ----------
+
+type FilterableProject = {
+  status: string
+  quota: number
+  totalDuration?: number
+}
+
+/** Le projet dépasse-t-il son quota ? (signalement, l'état ne change pas) */
+export const isProjectOver = (p: FilterableProject) =>
+  isOverQuota(p.totalDuration, p.quota)
+
+/** Nombre de projets en dépassement dans une liste. */
+export const countOver = (items: FilterableProject[] = []) =>
+  items.filter(isProjectOver).length
+
+/** Filtre par état (vide = tous) et/ou projets en dépassement uniquement. */
+export function filterProjects<T extends FilterableProject>(
+  items: T[],
+  f: { status?: string; overOnly?: boolean },
+): T[] {
+  return items.filter(
+    (p) =>
+      (!f.status || p.status === f.status) && (!f.overOnly || isProjectOver(p)),
+  )
+}

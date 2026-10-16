@@ -85,6 +85,7 @@
           <ContributionTable
             v-if="project.contributions?.length"
             :items="project.contributions"
+            show-user
           />
           <p v-else class="ap-empty ap-muted">
             Aucune contribution enregistrée.

@@ -5,7 +5,7 @@ Projet d'Intégration Opérationnelle (3iL I3, septembre 2026).
 Application web interne permettant :
 
 - aux **développeurs** de déclarer leurs contributions (temps passé, en minutes, sur un projet) ;
-- aux **responsables** de gérer les projets, les serveurs, les comptes et les affectations, et de suivre la charge de l'équipe.
+- aux **responsables** de gérer les projets, les serveurs, les comptes et les affectations, et de suivre la charge de l'équipe, notamment les projets qui dépassent leur quota.
 
 ## Structure du dépôt
 
@@ -115,13 +115,18 @@ Combinaisons autorisées : `ADMIN`, `MANAGER`, `ADMIN` + `MANAGER`, ou `DEVELOPE
 | Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | API + interface |
 | Un développeur n'est affecté qu'à un projet `PLANNED` ou `IN_PROGRESS` | interface uniquement |
 | Un développeur ne lit, déclare, modifie ou supprime que ses propres contributions | API + interface |
+| Un développeur ne voit d'un projet que ses propres contributions, et seulement s'il y est affecté | API + interface |
 | L'email d'un utilisateur est unique | API |
 | Un utilisateur qui a des affectations ou des contributions doit rester `DEVELOPER` | API |
+| Un projet est en dépassement quand sa durée cumulée dépasse son quota (signalement, l'état ne change pas) | interface (l'API fournit `totalDuration`) |
 
 États d'un projet : `PLANNED`, `IN_PROGRESS`, `PAUSE`, `FINISH` (clôturé), `CANCELED`.
 
+Unités : le quota d'un projet est en **heures**, la durée d'une contribution en **minutes**.
+
+L'interface prend la couleur d'accent de la barre de navigation selon le rôle de l'utilisateur connecté (`ADMIN` prime sur `MANAGER`, puis `DEVELOPER`) et propose des filtres sur les listes de projets (statut, dépassement) et de contributions (développeur, projet, période).
+
 ## Reste à faire
 
-- Signaler les projets en dépassement de quota (temps consommé > quota).
 - Tableau de bord du responsable : temps par développeur sur une période, projets en dépassement, projets clôturés récemment.
 - Côté API : vérifier l'état du projet lors d'une affectation.

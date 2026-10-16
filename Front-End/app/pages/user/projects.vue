@@ -21,7 +21,15 @@
         :empty="!projects.length"
         empty-text="Cet utilisateur n’a aucun projet."
       >
-        <ProjectCards :items="projects" />
+        <ProjectFilter
+          v-model:status="statusFilter"
+          v-model:over-only="overOnly"
+          :items="projects"
+        />
+        <p v-if="!filtered.length" class="ap-empty ap-muted">
+          Aucun projet ne correspond à ces filtres.
+        </p>
+        <ProjectCards v-else :items="filtered" />
       </DataState>
     </AppPage>
   </div>
@@ -38,6 +46,14 @@
   const result = id ? await getProjectByUserId(id) : null
 
   const projects = computed(() => result?.data.value ?? [])
+  const statusFilter = ref('')
+  const overOnly = ref(false)
+  const filtered = computed(() =>
+    filterProjects(projects.value, {
+      status: statusFilter.value,
+      overOnly: overOnly.value,
+    }),
+  )
   const pending = computed(() => result?.status.value === 'pending')
   const error = computed(() => result?.error.value)
   const options = computed(() =>

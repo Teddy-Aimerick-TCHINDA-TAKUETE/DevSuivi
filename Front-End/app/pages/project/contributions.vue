@@ -45,13 +45,15 @@
         <DateFilter
           v-model:from="from"
           v-model:to="to"
+          v-model:user="user"
+          :users="developers"
           :count="filtered.length"
           :total="sumDuration(filtered)"
         />
         <p v-if="!filtered.length" class="ap-empty ap-muted">
           Aucune contribution sur cette période.
         </p>
-        <ContributionTable v-else :items="filtered" />
+        <ContributionTable v-else :items="filtered" show-user />
       </DataState>
     </AppPage>
   </div>
@@ -68,11 +70,17 @@
   const result = id ? await getContributiosByProjectId(id) : null
 
   const contributions = computed(() => result?.data.value ?? [])
-  // Filtre par date (bornes incluses)
+  // Filtres : développeur (0 = tous) et date (bornes incluses)
   const from = ref('')
   const to = ref('')
+  const user = ref(0)
+  const developers = computed(() => distinctUsers(contributions.value))
   const filtered = computed(() =>
-    filterByDate(contributions.value, from.value, to.value),
+    filterContributions(contributions.value, {
+      user: user.value,
+      from: from.value,
+      to: to.value,
+    }),
   )
   const pending = computed(() => result?.status.value === 'pending')
   const error = computed(() => result?.error.value)

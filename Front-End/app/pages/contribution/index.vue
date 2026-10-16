@@ -35,7 +35,7 @@
           <h3>Les plus récentes</h3>
           <NuxtLink to="/contribution/all">Voir la liste complète →</NuxtLink>
         </div>
-        <ContributionTable :items="recent" />
+        <ContributionTable :items="recent" show-user show-project />
       </DataState>
     </AppPage>
   </div>

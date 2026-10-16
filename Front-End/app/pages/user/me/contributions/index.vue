@@ -40,7 +40,7 @@
             >Voir la liste complète →</NuxtLink
           >
         </div>
-        <ContributionTableMe :items="recent" />
+        <ContributionTableMe :items="recent" show-project />
       </DataState>
     </AppPage>
   </div>

@@ -35,12 +35,16 @@ Le CORS autorise uniquement `http://localhost:3000` (le front Nuxt), voir `Secur
 Scripts SQL dans [src/main/resources/data/](src/main/resources/data/) :
 
 1. `dev-suivi.sql` : supprime puis recrée le schéma `public` et les tables.
-2. `init-dev-suivi.sql` : insère le jeu de test (16 utilisateurs, 7 serveurs, 11 projets, affectations, contributions). Les mots de passe sont hachés en bcrypt via l'extension `pgcrypto`.
+2. `init-dev-suivi.sql` : insère le jeu de test (16 utilisateurs, 7 serveurs, 18 projets, 36 affectations, 46 contributions). Les mots de passe sont hachés en bcrypt via l'extension `pgcrypto`.
 
 ```bash
 psql -U postgres -d dev_suivi -f src/main/resources/data/dev-suivi.sql
 psql -U postgres -d dev_suivi -f src/main/resources/data/init-dev-suivi.sql
 ```
+
+### Jeu de test des projets
+
+Les 5 états sont représentés (`IN_PROGRESS` 9 projets, `PLANNED` 3, `FINISH` 3, `PAUSE` 2, `CANCELED` 1) et 5 projets sont **en dépassement de quota** : API Portal RH (29,5 h pour 20 h), Migration Cloud AWS (clôturé, 15 h pour 14 h), Microservices Payment (21 h pour 18 h), Outil de Facturation (22 h pour 16 h) et le projet de Teddy (7 h 24 pour 5 h). Application Mobile Client, Pipeline Data ETL et Audit Accessibilité sont à plus de 90 % de leur quota sans le dépasser. Les contributions ne portent que sur des développeurs affectés, jamais sur un projet `PLANNED`.
 
 ### Comptes de test
 
@@ -86,6 +90,7 @@ src/main/java/devSuivi/
 - `POST /auth/refresh` avec `{ "refreshToken" }` renvoie une nouvelle paire de jetons.
 - L'access token est un JWT HS256 : `sub` = email, claim `roles` = `["ADMIN", ...]`.
 - Les refresh tokens sont gardés en mémoire : ils sont perdus au redémarrage de l'API.
+- Comme `sub` contient l'email, un utilisateur qui change son email doit se reconnecter : l'ancien jeton ne désigne plus personne. L'interface le déconnecte automatiquement.
 
 ## Endpoints
 
@@ -93,20 +98,23 @@ src/main/java/devSuivi/
 |---|---|---|
 | POST | `/auth/login`, `/auth/register`, `/auth/refresh` | public |
 | GET | `/user/me` | authentifié |
-| GET | `/user/{id}/projects`, `/user/{id}/contributions` | authentifié |
-| GET | `/user` | ADMIN, MANAGER |
-| POST | `/user` | ADMIN |
-| GET/PUT/DELETE | `/user/{id}` | ADMIN |
-| GET | `/project`, `/project/{id}`, `/project/{id}/users`, `/project/{id}/contributions` | authentifié |
+| PUT | `/user/me` | authentifié : modifie son propre profil (rôles inchangés, mot de passe facultatif) |
+| GET | `/user/{id}/projects`, `/user/{id}/contributions` | authentifié : les siens uniquement (ADMIN et MANAGER : tous) |
+| GET | `/user`, `/user/{id}` | ADMIN, MANAGER |
+| POST/PUT/DELETE | `/user`, `/user/{id}` | ADMIN |
+| GET | `/project` | ADMIN, MANAGER |
+| GET | `/project/{id}`, `/project/{id}/users`, `/project/{id}/contributions` | authentifié et affecté au projet (ADMIN et MANAGER : tous) |
 | POST/PUT/DELETE | `/project`, `/project/{id}` | ADMIN, MANAGER |
 | GET/POST/PUT/DELETE | `/server`, `/server/{id}`, `/server/{id}/projects` | ADMIN, MANAGER |
 | GET/POST/DELETE | `/assign` (corps `{ user, project }`), `/assign/id` | ADMIN, MANAGER |
 | GET | `/contribution` (toutes) | ADMIN, MANAGER |
-| GET/POST/PUT/DELETE | `/contribution/{id}`, `/contribution` | authentifié |
+| GET/POST/PUT/DELETE | `/contribution/{id}`, `/contribution` | authentifié : les siennes uniquement (ADMIN et MANAGER : toutes) |
 
 ## Données métier
 
-- `Project.quota` : quota en heures. `Contribution.duration` : durée en minutes.
+- `Project.quota` : quota en **heures**. `Contribution.duration` : durée en **minutes**. Toute comparaison doit convertir (quota × 60).
+- `totalDuration` (minutes) est renvoyé dans `ProjectListDto` et `ProjectDetailDto` : c'est la somme de **toutes** les contributions du projet, même quand la liste `contributions` d'un développeur est réduite aux siennes. L'indicateur de dépassement (`totalDuration` > quota × 60) est calculé par l'interface ; ce n'est pas un champ de l'API.
+- `ContributionListDto` contient aussi `idUser`, `userName`, `idProject` et `projectName`, ce qui permet aux listes de filtrer et d'afficher le développeur et le projet sans requête supplémentaire.
 - `Project.status` : `PLANNED`, `IN_PROGRESS`, `PAUSE`, `FINISH` (clôturé), `CANCELED`. Le jeu de test utilise `PLANNED`, `IN_PROGRESS` et `FINISH`.
 - Supprimer un projet ou un utilisateur supprime en cascade ses affectations et ses contributions. Supprimer un serveur supprime aussi ses projets.
 
@@ -114,13 +122,16 @@ src/main/java/devSuivi/
 
 | Règle | Service | Erreur |
 |---|---|---|
-| L'email est unique (sans tenir compte de la casse) | `UserService` | 409 |
+| Le mot de passe est obligatoire à la création d'un compte ; en modification, un mot de passe vide conserve l'ancien | `UserService` | 400 |
+| L'email est unique (sans tenir compte de la casse), à la création comme en modification | `UserService` | 409 |
 | Rôles connus uniquement (`ADMIN`, `MANAGER`, `DEVELOPER`) ; `DEVELOPER` ne se combine pas avec `ADMIN` ou `MANAGER` | `UserService` | 400 |
 | Un utilisateur qui a des affectations ou des contributions ne peut pas perdre le rôle `DEVELOPER` | `UserService` | 409 |
 | Seul un `DEVELOPER` peut être affecté à un projet | `AssignService` | 400 |
 | Seul un `DEVELOPER` peut déclarer une contribution | `ContributionService` | 400 |
 | Une contribution n'est acceptée que sur un projet `IN_PROGRESS` auquel le développeur est affecté | `ContributionService` | 409 |
 | Hors ADMIN et MANAGER, un utilisateur ne lit, déclare, modifie ou supprime que ses propres contributions, et ne lit que ses propres projets et contributions via `/user/{id}/...` | `UserService.verifierAcces` | 403 |
+| Hors ADMIN et MANAGER, on ne lit un projet, ses membres et ses contributions que si l'on y est affecté ; la liste des contributions est alors réduite aux siennes | `ProjectService` | 403 |
+| Via `PUT /user/me`, un utilisateur ne peut pas changer ses propres rôles (ignorés) | `UserService.updateMe` | — |
 
 Modifier la durée ou la date d'une contribution existante reste possible même si le projet a été clôturé depuis. Changer son utilisateur ou son projet repasse par les contrôles ci-dessus.
 
@@ -129,5 +140,6 @@ Modifier la durée ou la date d'une contribution existante reste possible même 
 Pas encore géré côté API :
 
 - vérifier l'état du projet lors d'une affectation (`PLANNED` ou `IN_PROGRESS`) : seule l'interface le contrôle pour l'instant ;
-- calculer le temps consommé et l'indicateur de dépassement de quota ;
-- fournir les données du tableau de bord (temps par développeur sur une période, projets en dépassement, projets clôturés récemment).
+- fournir les données du tableau de bord (temps par développeur sur une période, projets en dépassement, projets clôturés récemment). Le temps consommé (`totalDuration`) est déjà fourni, mais pas de route d'agrégation par période.
+
+Le dépassement de quota n'est qu'un signalement : il ne change jamais l'état du projet.
