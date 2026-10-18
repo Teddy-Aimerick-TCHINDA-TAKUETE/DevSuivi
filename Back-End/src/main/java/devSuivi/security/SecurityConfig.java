@@ -35,8 +35,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/contribution").hasAnyRole("ADMIN", "MANAGER")
                     .requestMatchers("/contribution/**").authenticated()
                     .requestMatchers(HttpMethod.GET,"/user", "/user/{id:[\\d]+}").hasAnyRole("ADMIN", "MANAGER")
-                    .requestMatchers("/user/**").hasRole("ADMIN")
-                    .requestMatchers("/server/**", "/project/**", "/assign/**").hasAnyRole("ADMIN", "MANAGER")
+                    .requestMatchers("/server/**", "/user/**").hasRole("ADMIN")
+                    .requestMatchers("/project/**", "/assign/**").hasAnyRole("ADMIN", "MANAGER")
                     .anyRequest().authenticated()
             )
 
