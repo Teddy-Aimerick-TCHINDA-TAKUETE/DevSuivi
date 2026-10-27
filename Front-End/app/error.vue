@@ -36,7 +36,7 @@
   useHead({ title: `${code.value} · ${title.value}` })
 
   const goHome = () => clearError({ redirect: '/' })
-  const goLogin = () => clearError({ redirect: '/loging' })
+  const goLogin = () => clearError({ redirect: '/login' })
 </script>
 
 <style>

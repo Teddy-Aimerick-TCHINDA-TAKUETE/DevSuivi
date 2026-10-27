@@ -99,7 +99,7 @@
       user: a.user.id,
       project: a.project.id,
     })
-    message.value = err.value ? errorMessage(err.value) : ''
+    message.value = err ? errorMessage(err) : ''
     await refresh()
   }
 </script>

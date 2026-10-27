@@ -140,8 +140,8 @@
     )
       return
     const { error: err } = await deleteProject(id)
-    if (err.value) {
-      message.value = errorMessage(err.value)
+    if (err) {
+      message.value = errorMessage(err)
       return
     }
     await navigateTo('/project/all')

@@ -1,26 +1,42 @@
-import type { AuthRequestDto, AuthResponseDto } from '~/types/authTypes'
+import type {
+  AuthRequestDto,
+  AuthResponseDto,
+  RefreshTokenDto,
+} from '~/types/authTypes'
 import type { UserDetailDto, UserNewDto } from '~/types/userTypes'
 
+// Routes publiques (/auth/**) : pas de jeton à envoyer, donc $fetch directement
+// (surtout pas $api, qui tenterait un renouvellement sur un 401 « mauvais mot de passe »).
 export function useApiAuth() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
+  const baseURL = useRuntimeConfig().public.apiBase
 
-  async function loging(authRequestDto: AuthRequestDto) {
-    return await useFetch<AuthResponseDto>(() => `${apiBase}/auth/login`, {
+  function loging(authRequestDto: AuthRequestDto) {
+    return appeler<AuthResponseDto>($fetch, '/auth/login', {
+      baseURL,
       method: 'POST',
       body: authRequestDto,
     })
   }
-  async function register(userNewDto: UserNewDto) {
-    return await useFetch<UserDetailDto>(() => `${apiBase}/auth/register`, {
+  function register(userNewDto: UserNewDto) {
+    return appeler<UserDetailDto>($fetch, '/auth/register', {
+      baseURL,
       method: 'POST',
       body: userNewDto,
     })
   }
-  async function refresh(authRequestDto: AuthRequestDto) {
-    return await useFetch<AuthResponseDto>(() => `${apiBase}/auth/refresh`, {
+  function refresh(refreshTokenDto: RefreshTokenDto) {
+    return appeler<AuthResponseDto>($fetch, '/auth/refresh', {
+      baseURL,
       method: 'POST',
-      body: authRequestDto,
+      body: refreshTokenDto,
+    })
+  }
+  // Révoque le refresh token côté serveur
+  function logout(refreshTokenDto: RefreshTokenDto) {
+    return appeler($fetch, '/auth/logout', {
+      baseURL,
+      method: 'POST',
+      body: refreshTokenDto,
     })
   }
 
@@ -28,5 +44,6 @@ export function useApiAuth() {
     loging,
     register,
     refresh,
+    logout,
   }
 }

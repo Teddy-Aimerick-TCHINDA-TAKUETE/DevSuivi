@@ -5,65 +5,41 @@ import type {
 } from '~/types/conrtibutionTypes'
 
 export function useApiContribution() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const accessToken = getAccessToken()
+  const { $api } = useNuxtApp()
 
+  // --- Lectures : useFetch ----------------------------------------------------
   async function getAllContributions() {
-    return await useFetch<ContributionListDto[]>(
-      () => `${apiBase}/contribution`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-      },
-    )
+    return await useFetch<ContributionListDto[]>('/contribution', {
+      $fetch: $api,
+    })
   }
   async function getContributionById(id: number) {
     return await useFetch<ContributionDetailDto>(
-      () => `${apiBase}/contribution/${id}`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-      },
+      () => `/contribution/${id}`,
+      { $fetch: $api },
     )
   }
-  async function saveContribution(contributionNewDto: ContributionNewDto) {
-    return await useFetch<ContributionDetailDto>(
-      () => `${apiBase}/contribution`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-        method: 'POST',
-        body: contributionNewDto,
-      },
-    )
+
+  // --- Écritures : $fetch -----------------------------------------------------
+  function saveContribution(contributionNewDto: ContributionNewDto) {
+    return appeler<ContributionDetailDto>($api, '/contribution', {
+      method: 'POST',
+      body: contributionNewDto,
+    })
   }
-  async function updateContribution(
+  function updateContribution(
     id: number,
     contributionNewDto: ContributionNewDto,
   ) {
-    return await useFetch<ContributionDetailDto>(
-      () => `${apiBase}/contribution/${id}`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-        method: 'PUT',
-        body: contributionNewDto,
-      },
-    )
-  }
-  async function deleteContribution(id: number) {
-    return await useFetch(() => `${apiBase}/contribution/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-      method: 'DELETE',
+    return appeler<ContributionDetailDto>($api, `/contribution/${id}`, {
+      method: 'PUT',
+      body: contributionNewDto,
     })
   }
+  function deleteContribution(id: number) {
+    return appeler($api, `/contribution/${id}`, { method: 'DELETE' })
+  }
+
   return {
     getAllContributions,
     getContributionById,

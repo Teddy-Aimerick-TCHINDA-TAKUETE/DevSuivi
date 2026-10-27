@@ -5,16 +5,18 @@ import devSuivi.security.dto.AuthResponseDto;
 import devSuivi.security.dto.RefreshTokenDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -64,22 +66,37 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponseDto refresh(RefreshTokenDto dto) {
-        var refreshToken = dto.refreshToken();
-        var refreshData = refreshTokens.get(refreshToken);
+        // remove() est atomique : un refresh token ne sert qu'UNE fois (rotation).
+        // Si quelqu'un rejoue un ancien jeton, il est déjà supprimé -> 401.
+        var refreshData = refreshTokens.remove(dto.refreshToken());
         if (refreshData == null) {
-            throw new BadCredentialsException("Refresh refreshData invalide");
+            throw nonAuthentifie("Refresh token invalide");
         }
         if (refreshData.expiresAt().isBefore(Instant.now())) {
-            refreshTokens.remove(refreshToken);
-            throw new BadCredentialsException("Refresh refreshData expiré");
+            throw nonAuthentifie("Refresh token expiré");
         }
-        var user = userDetailsService.loadUserByUsername(refreshData.username());
-        return buildAuthResponse(user.getUsername(), user.getAuthorities());
+        try {
+            var user = userDetailsService.loadUserByUsername(refreshData.username());
+            return buildAuthResponse(user.getUsername(), user.getAuthorities());
+        } catch (UsernameNotFoundException e) {
+            // utilisateur supprimé ou email modifié depuis la connexion
+            throw nonAuthentifie("Utilisateur introuvable");
+        }
+    }
+
+    // Déconnexion : le refresh token est révoqué (sans erreur s'il est déjà inconnu)
+    public void logout(RefreshTokenDto dto) {
+        refreshTokens.remove(dto.refreshToken());
     }
 
     //-------
     // Méthodes auxiliaires
     //-------
+
+    // 401 propre, avec un message exploitable par le front (ProblemDetail)
+    private ResponseStatusException nonAuthentifie(String message) {
+        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
+    }
 
     private String createAccessToken(String username, Collection<? extends GrantedAuthority> authorities, Instant expireAt) {
         var roles = authorities
@@ -108,13 +125,9 @@ public class AuthService {
 
     private AuthResponseDto buildAuthResponse(String username, Collection<? extends GrantedAuthority> authorities) {
 
-        System.out.println("----------------------");
-        for( var a : authorities) {
-            System.out.println(a);
-        }
-        System.out.println("----------------------");
-
         var now = Instant.now();
+        // Ménage : on oublie les refresh tokens expirés (sinon la map grossit sans fin)
+        refreshTokens.values().removeIf(d -> d.expiresAt().isBefore(now));
         var accessExpireAt = now.plusSeconds(jwtExpiration);
         var accessToken = createAccessToken(username, authorities, accessExpireAt);
         var refreshExpireAt = now.plusSeconds(refreshExpiration);

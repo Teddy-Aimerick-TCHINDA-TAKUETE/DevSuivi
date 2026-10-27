@@ -201,13 +201,13 @@
       ? await updateContribution(id, dto)
       : await saveContribution(dto)
     submitting.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       return
     }
     await navigateTo(
-      res.data.value?.id
-        ? `/contribution/${res.data.value.id}`
+      res.data?.id
+        ? `/contribution/${res.data.id}`
         : '/contribution/all',
     )
   }

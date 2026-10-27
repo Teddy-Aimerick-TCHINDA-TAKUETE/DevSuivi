@@ -66,19 +66,22 @@
     const { data: authResponseDto, error } = await loging({ ...form })
     loading.value = false
 
-    if (error.value || !authResponseDto.value) {
+    if (error || !authResponseDto) {
       setAccessToken('')
       setRefreshToken('')
-      const status = error.value?.statusCode
+      const status = error?.statusCode
       message.value =
         status === 401 || status === 403
           ? 'Email ou mot de passe incorrect.'
-          : errorMessage(error.value)
+          : errorMessage(error)
       return
     }
 
-    setAccessToken(authResponseDto.value.accessToken)
-    setRefreshToken(authResponseDto.value.refreshToken)
+    setAccessToken(authResponseDto.accessToken)
+    setRefreshToken(
+      authResponseDto.refreshToken,
+      secondsUntil(authResponseDto.refreshExpireAt),
+    )
 
     const redirect = String(route.query.redirect ?? '')
     await navigateTo(

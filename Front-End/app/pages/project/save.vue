@@ -127,12 +127,12 @@
     const dto: ProjectNewDto = { ...form, quota: Number(form.quota) }
     const res = id ? await updateProject(id, dto) : await saveProject(dto)
     submitting.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       return
     }
     await navigateTo(
-      res.data.value?.id ? `/project/${res.data.value.id}` : '/project/all',
+      res.data?.id ? `/project/${res.data.id}` : '/project/all',
     )
   }
 </script>

@@ -70,7 +70,7 @@
   import { initials, fullName, roleTone } from '~/utils/format'
 
   const token = getAccessToken()
-  const refreshToken = getRefreshToken()
+  const { logout } = useSession()
   const { data: user } = await useApiUser().getUserProfil()
   const { hasRole } = useAuth()
 
@@ -89,11 +89,6 @@
     return user.value
   })
 
-  function logout() {
-    token.value = null
-    refreshToken.value = null
-    navigateTo('/login')
-  }
 </script>
 
 <style scoped></style>

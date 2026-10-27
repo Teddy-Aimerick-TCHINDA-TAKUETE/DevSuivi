@@ -121,8 +121,8 @@
       project: form.project,
     })
     submitting.value = false
-    if (error.value) {
-      message.value = errorMessage(error.value)
+    if (error) {
+      message.value = errorMessage(error)
       return
     }
     await navigateTo('/assign/all')

@@ -2,60 +2,40 @@ import type { ProjectListDto } from '~/types/projectTypes'
 import type { ServerListDto, ServerNewDto } from '~/types/serverTypes'
 
 export function useApiServer() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const accessToken = getAccessToken()
+  const { $api } = useNuxtApp()
 
+  // --- Lectures : useFetch ----------------------------------------------------
   async function getAllServers() {
-    return await useFetch<ServerListDto[]>(() => `${apiBase}/server`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-    })
+    return await useFetch<ServerListDto[]>('/server', { $fetch: $api })
   }
   async function getServerById(id: number) {
-    return await useFetch<ServerListDto>(() => `${apiBase}/server/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+    return await useFetch<ServerListDto>(() => `/server/${id}`, {
+      $fetch: $api,
     })
   }
   async function getProjectsByServerId(id: number) {
-    return await useFetch<ProjectListDto[]>(
-      () => `${apiBase}/server/${id}/projects`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-      },
-    )
+    return await useFetch<ProjectListDto[]>(() => `/server/${id}/projects`, {
+      $fetch: $api,
+    })
   }
-  async function saveServer(serverNewDto: ServerNewDto) {
-    return await useFetch<ServerListDto>(() => `${apiBase}/server`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+
+  // --- Écritures : $fetch -----------------------------------------------------
+  function saveServer(serverNewDto: ServerNewDto) {
+    return appeler<ServerListDto>($api, '/server', {
       method: 'POST',
       body: serverNewDto,
     })
   }
-  async function updateServer(id: number, serverNewDto: ServerNewDto) {
-    return await useFetch<ServerListDto>(() => `${apiBase}/server/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+  function updateServer(id: number, serverNewDto: ServerNewDto) {
+    return appeler<ServerListDto>($api, `/server/${id}`, {
       method: 'PUT',
       body: serverNewDto,
     })
   }
-  async function deleteServer(id: number) {
-    return await useFetch(() => `${apiBase}/server/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-      method: 'DELETE',
-    })
+  function deleteServer(id: number) {
+    return appeler($api, `/server/${id}`, { method: 'DELETE' })
   }
+
   return {
     getAllServers,
     getServerById,

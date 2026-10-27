@@ -52,8 +52,8 @@
     }
     const res = await updateProject(props.project.id, dto)
     saving.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       select.value = previous
       return
     }

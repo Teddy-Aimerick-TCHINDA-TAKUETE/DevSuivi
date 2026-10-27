@@ -70,12 +70,12 @@
       ? await updateServer(id, { ...form })
       : await saveServer({ ...form })
     submitting.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       return
     }
     await navigateTo(
-      res.data.value?.id ? `/server/${res.data.value.id}` : '/server/all',
+      res.data?.id ? `/server/${res.data.id}` : '/server/all',
     )
   }
 </script>

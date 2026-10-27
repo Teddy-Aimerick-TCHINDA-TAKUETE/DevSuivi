@@ -80,6 +80,7 @@
   // /user/save → création · /user/save?id=4 → modification
   const id = Number(useRoute().query.id) || null
   const { getUserById, saveUser, updateUser, getUserProfil } = useApiUser()
+  const { logout } = useSession()
   const existing = id ? await getUserById(id) : null
   const { data: me } = await getUserProfil()
   const itIsMe = ref<boolean>(false)
@@ -155,17 +156,15 @@
     }
     const res = id ? await updateUser(id, dto) : await saveUser(dto)
     submitting.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       return
     }
     if (emailChanged.value) {
-      getAccessToken().value = null
-      getRefreshToken().value = null
-      return await navigateTo('/login')
+      return await logout()
     }
     await navigateTo(
-      res.data.value?.id ? `/user/${res.data.value.id}` : '/user/all',
+      res.data?.id ? `/user/${res.data.id}` : '/user/all',
     )
   }
 </script>

@@ -122,7 +122,7 @@
   // async function remove(id: number, name: string) {
   //   if (!confirm(`Supprimer le projet « ${name} » ?`)) return
   //   const { error: err } = await deleteProject(id)
-  //   message.value = err.value ? errorMessage(err.value) : ''
+  //   message.value = err ? errorMessage(err) : ''
   //   await refresh()
   // }
 </script>

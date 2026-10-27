@@ -129,8 +129,8 @@
     )
       return
     const { error: err } = await deleteUser(id)
-    if (err.value) {
-      message.value = errorMessage(err.value)
+    if (err) {
+      message.value = errorMessage(err)
       return
     }
     await navigateTo('/user/all')

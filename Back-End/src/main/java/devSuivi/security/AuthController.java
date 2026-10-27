@@ -54,8 +54,17 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "User Connecté",
                     content =  @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) )
     } )
-    AuthResponseDto refresh(@RequestBody RefreshTokenDto refreshTokenDto){
+    AuthResponseDto refresh(@RequestBody @Valid RefreshTokenDto refreshTokenDto){
         return authService.refresh(refreshTokenDto);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiResponses( {
+            @ApiResponse(responseCode = "204", description = "Refresh token révoqué")
+    } )
+    void logout(@RequestBody @Valid RefreshTokenDto refreshTokenDto){
+        authService.logout(refreshTokenDto);
     }
 
 }

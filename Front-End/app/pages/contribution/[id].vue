@@ -100,8 +100,8 @@
     )
       return
     const { error: err } = await deleteContribution(id)
-    if (err.value) {
-      message.value = errorMessage(err.value)
+    if (err) {
+      message.value = errorMessage(err)
       return
     }
     await navigateTo('/contribution/all')

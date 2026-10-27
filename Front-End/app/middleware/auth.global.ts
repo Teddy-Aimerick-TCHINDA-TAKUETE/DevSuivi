@@ -13,12 +13,8 @@ async function userPage(to: { path: string; query: Record<string, any> }) {
 }
 
 async function isOwnUserPage(to: { path: string; query: Record<string, any> }) {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const accessToken = getAccessToken()
-  const user = await $fetch<UserListDto>(`${apiBase}/user/me`, {
-    headers: { Authorization: `Bearer ${accessToken.value}` },
-  })
+  const { $api } = useNuxtApp()
+  const user = await $api<UserListDto>('/user/me')
   const myId = user.id
   if (!myId) return false
   if (to.path === `/user/me`) return true
@@ -56,22 +52,14 @@ async function isOwnProjectPage(to: {
   if (!projectId) return false
 
   // Composables AVANT le premier await (sinon le contexte Nuxt est perdu côté serveur)
-  const apiBase = useRuntimeConfig().public.apiBase
-  const accessToken = getAccessToken()
-  const user = await $fetch<UserListDto>(`${apiBase}/user/me`, {
-    headers: { Authorization: `Bearer ${accessToken.value}` },
-  })
+  const { $api } = useNuxtApp()
+  const user = await $api<UserListDto>('/user/me')
 
   const myId = user.id
   if (!myId) return false
 
   try {
-    const projects = await $fetch<{ id: number }[]>(
-      `${apiBase}/user/${myId}/projects`,
-      {
-        headers: { Authorization: `Bearer ${accessToken.value}` },
-      },
-    )
+    const projects = await $api<{ id: number }[]>(`/user/${myId}/projects`)
     return projects.some((p) => p.id === projectId)
   } catch {
     return false
@@ -96,21 +84,15 @@ async function isOwnCotributionPage(to: {
   if (detail) contributionId = Number(detail[1])
   if (!contributionId) return false
 
-  const apiBase = useRuntimeConfig().public.apiBase
-  const accessToken = getAccessToken()
-  const user = await $fetch<UserListDto>(`${apiBase}/user/me`, {
-    headers: { Authorization: `Bearer ${accessToken.value}` },
-  })
+  const { $api } = useNuxtApp()
+  const user = await $api<UserListDto>('/user/me')
 
   const myId = user.id
   if (!myId) return false
 
   try {
-    const contributions = await $fetch<{ id: number }[]>(
-      `${apiBase}/user/${myId}/contributions`,
-      {
-        headers: { Authorization: `Bearer ${accessToken.value}` },
-      },
+    const contributions = await $api<{ id: number }[]>(
+      `/user/${myId}/contributions`,
     )
     return contributions.some((p) => p.id === contributionId)
   } catch {

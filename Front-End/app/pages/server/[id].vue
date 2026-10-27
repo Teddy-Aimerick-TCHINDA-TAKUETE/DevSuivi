@@ -52,8 +52,8 @@
     )
       return
     const { error: err } = await deleteServer(id)
-    if (err.value) {
-      message.value = errorMessage(err.value)
+    if (err) {
+      message.value = errorMessage(err)
       return
     }
     await navigateTo('/server/all')

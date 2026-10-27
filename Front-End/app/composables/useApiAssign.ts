@@ -5,44 +5,31 @@ import type {
 } from '~/types/assignTypes'
 
 export function useApiAssign() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const accessToken = getAccessToken()
+  const { $api } = useNuxtApp()
 
+  // --- Lectures : useFetch ----------------------------------------------------
   async function getAllAssigns() {
-    return await useFetch<AssignListDto[]>(() => `${apiBase}/assign`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-    })
+    return await useFetch<AssignListDto[]>('/assign', { $fetch: $api })
   }
   async function getAssignById(assignId: AssignId) {
-    return await useFetch<AssignListDto>(() => `${apiBase}/assign/id`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+    return await useFetch<AssignListDto>('/assign/id', {
+      $fetch: $api,
       method: 'GET',
       body: assignId,
     })
   }
-  async function saveAssign(assignIdNewDto: AssignIdNewDto) {
-    return await useFetch<AssignListDto>(() => `${apiBase}/assign`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+
+  // --- Écritures : $fetch -----------------------------------------------------
+  function saveAssign(assignIdNewDto: AssignIdNewDto) {
+    return appeler<AssignListDto>($api, '/assign', {
       method: 'POST',
       body: assignIdNewDto,
     })
   }
-  async function deleteAssign(assignId: AssignId) {
-    return await useFetch(() => `${apiBase}/assign`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-      method: 'DELETE',
-      body: assignId,
-    })
+  function deleteAssign(assignId: AssignId) {
+    return appeler($api, '/assign', { method: 'DELETE', body: assignId })
   }
+
   return {
     getAllAssigns,
     getAssignById,

@@ -7,70 +7,46 @@ import type {
 import type { UserListDto } from '~/types/userTypes'
 
 export function useApiProject() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
-  const accessToken = getAccessToken()
+  const { $api } = useNuxtApp()
 
+  // --- Lectures : useFetch ----------------------------------------------------
   async function getAllProjects() {
-    return await useFetch<ProjectListDto[]>(() => `${apiBase}/project`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-    })
+    return await useFetch<ProjectListDto[]>('/project', { $fetch: $api })
   }
   async function getProjectById(id: number) {
-    return await useFetch<ProjectDetailDto>(() => `${apiBase}/project/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+    return await useFetch<ProjectDetailDto>(() => `/project/${id}`, {
+      $fetch: $api,
     })
   }
   async function getUsersByProjectId(id: number) {
-    return await useFetch<UserListDto[]>(
-      () => `${apiBase}/project/${id}/users`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-      },
-    )
+    return await useFetch<UserListDto[]>(() => `/project/${id}/users`, {
+      $fetch: $api,
+    })
   }
   async function getContributiosByProjectId(id: number) {
     return await useFetch<ContributionListDto[]>(
-      () => `${apiBase}/project/${id}/contributions`,
-      {
-        headers: computed(() => ({
-          Authorization: `Bearer ${accessToken.value}`,
-        })),
-      },
+      () => `/project/${id}/contributions`,
+      { $fetch: $api },
     )
   }
-  async function saveProject(projectNewDto: ProjectNewDto) {
-    return await useFetch<ProjectDetailDto>(() => `${apiBase}/project`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+
+  // --- Écritures : $fetch -----------------------------------------------------
+  function saveProject(projectNewDto: ProjectNewDto) {
+    return appeler<ProjectDetailDto>($api, '/project', {
       method: 'POST',
       body: projectNewDto,
     })
   }
-  async function updateProject(id: number, projectNewDto: ProjectNewDto) {
-    return await useFetch<ProjectDetailDto>(() => `${apiBase}/project/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
+  function updateProject(id: number, projectNewDto: ProjectNewDto) {
+    return appeler<ProjectDetailDto>($api, `/project/${id}`, {
       method: 'PUT',
       body: projectNewDto,
     })
   }
-  async function deleteProject(id: number) {
-    return await useFetch(() => `${apiBase}/project/${id}`, {
-      headers: computed(() => ({
-        Authorization: `Bearer ${accessToken.value}`,
-      })),
-      method: 'DELETE',
-    })
+  function deleteProject(id: number) {
+    return appeler($api, `/project/${id}`, { method: 'DELETE' })
   }
+
   return {
     getAllProjects,
     getProjectById,

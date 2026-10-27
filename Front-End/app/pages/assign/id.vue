@@ -84,8 +84,8 @@
       user: userId,
       project: projectId,
     })
-    if (err.value) {
-      message.value = errorMessage(err.value)
+    if (err) {
+      message.value = errorMessage(err)
       return
     }
     await navigateTo('/assign/all')

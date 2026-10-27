@@ -57,6 +57,7 @@
   definePageMeta({ key: (route) => route.fullPath })
 
   const { getUserProfil, updateMe } = useApiUser()
+  const { logout } = useSession()
   const existing = await getUserProfil()
   const originalEmail = ref('')
 
@@ -111,15 +112,13 @@
     }
     const res = await updateMe(dto)
     submitting.value = false
-    if (res.error.value) {
-      message.value = errorMessage(res.error.value)
+    if (res.error) {
+      message.value = errorMessage(res.error)
       return
     }
     // email changé : le JWT n'est plus valable, on se reconnecte
     if (emailChanged.value) {
-      getAccessToken().value = null
-      getRefreshToken().value = null
-      return await navigateTo('/login')
+      return await logout()
     }
     await navigateTo('/profil')
   }
